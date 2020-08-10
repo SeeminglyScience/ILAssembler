@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26124.0
+MinimumVisualStudioVersion = 15.0.26124.0
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{912A89A4-8F4E-41A3-9585-55E60F8BF1D0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ILAssembler", "src\ILAssembler\ILAssembler.csproj", "{CC0D251A-E6E3-4AAE-9823-90DDEE0770DD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CC0D251A-E6E3-4AAE-9823-90DDEE0770DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC0D251A-E6E3-4AAE-9823-90DDEE0770DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC0D251A-E6E3-4AAE-9823-90DDEE0770DD}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CC0D251A-E6E3-4AAE-9823-90DDEE0770DD}.Debug|x64.Build.0 = Debug|Any CPU
+		{CC0D251A-E6E3-4AAE-9823-90DDEE0770DD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CC0D251A-E6E3-4AAE-9823-90DDEE0770DD}.Debug|x86.Build.0 = Debug|Any CPU
+		{CC0D251A-E6E3-4AAE-9823-90DDEE0770DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC0D251A-E6E3-4AAE-9823-90DDEE0770DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC0D251A-E6E3-4AAE-9823-90DDEE0770DD}.Release|x64.ActiveCfg = Release|Any CPU
+		{CC0D251A-E6E3-4AAE-9823-90DDEE0770DD}.Release|x64.Build.0 = Release|Any CPU
+		{CC0D251A-E6E3-4AAE-9823-90DDEE0770DD}.Release|x86.ActiveCfg = Release|Any CPU
+		{CC0D251A-E6E3-4AAE-9823-90DDEE0770DD}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{CC0D251A-E6E3-4AAE-9823-90DDEE0770DD} = {912A89A4-8F4E-41A3-9585-55E60F8BF1D0}
+	EndGlobalSection
+EndGlobal
