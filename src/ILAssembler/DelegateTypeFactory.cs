@@ -60,7 +60,9 @@ namespace ILAssembler
 
                 if (isVoidReturn)
                 {
-                    return genericDelegate.MakeGenericType(method.Parameters.ToModifiedTypeArray());
+                    return genericDelegate.IsGenericTypeDefinition
+                        ? genericDelegate.MakeGenericType(method.Parameters.ToModifiedTypeArray())
+                        : genericDelegate;
                 }
 
                 var funcArgs = new Type[method.Parameters.Length + 1];
