@@ -6,7 +6,10 @@ if ($PSVersionTable.PSVersion.Major -eq 5) {
 
 $throwOutsideAssembler = {
     [CmdletBinding()]
-    param()
+    param(
+        [Parameter(ValueFromRemainingArguments, DontShow)]
+        [object[]] $Arguments
+    )
     end {
         $PSCmdlet.ThrowTerminatingError(
             [Management.Automation.ErrorRecord]::new(
