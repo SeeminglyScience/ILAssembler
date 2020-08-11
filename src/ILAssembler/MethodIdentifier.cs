@@ -122,12 +122,24 @@ namespace ILAssembler
                     continue;
                 }
 
-                ParameterInfo[] candidateParameters = method.GetParameters();
-                if (candidateParameters.Length != Parameters.Length)
+                if (method.GetParameters().Length != Parameters.Length)
                 {
                     continue;
                 }
 
+                MethodInfo concreteMethod;
+                try
+                {
+                    concreteMethod = method.MakeGenericMethod(GenericArgs.ToModifiedTypeArray());
+                }
+                catch (Exception e)
+                {
+                    throw subject.GetParseError(
+                        "InvalidGenericArgs",
+                        ExceptionDispatchInfo.Capture(e));
+                }
+
+                ParameterInfo[] candidateParameters = concreteMethod.GetParameters();
                 bool isMatch = true;
                 for (int i = 0; i < candidateParameters.Length; i++)
                 {
@@ -140,19 +152,10 @@ namespace ILAssembler
 
                 if (!isMatch)
                 {
-                    continue;
+                    break;
                 }
 
-                try
-                {
-                    return method.MakeGenericMethod(GenericArgs.ToModifiedTypeArray());
-                }
-                catch (Exception e)
-                {
-                    throw subject.GetParseError(
-                        "InvalidGenericArgs",
-                        ExceptionDispatchInfo.Capture(e));
-                }
+                return concreteMethod;
             }
 
             throw ErrorMemberNotFound(subject);
