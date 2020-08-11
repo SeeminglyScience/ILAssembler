@@ -47,6 +47,13 @@ namespace ILAssembler
                 throw ErrorMemberNotFound(subject);
             }
 
+            if (resolvedCtor.DeclaringType!.IsGenericType)
+            {
+                return context.ILInfo.GetTokenFor(
+                    resolvedCtor.MethodHandle,
+                    resolvedCtor.DeclaringType.TypeHandle);
+            }
+
             return context.ILInfo.GetTokenFor(resolvedCtor.MethodHandle);
         }
     }

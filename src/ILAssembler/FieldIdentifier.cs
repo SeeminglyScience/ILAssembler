@@ -31,6 +31,13 @@ namespace ILAssembler
                 throw ErrorMemberNotFound(subject);
             }
 
+            if (field.DeclaringType!.IsGenericType)
+            {
+                return context.ILInfo.GetTokenFor(
+                    field.FieldHandle,
+                    field.DeclaringType.TypeHandle);
+            }
+
             return context.ILInfo.GetTokenFor(field.FieldHandle);
         }
     }
