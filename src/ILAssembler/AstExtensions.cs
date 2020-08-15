@@ -109,6 +109,13 @@ namespace ILAssembler
                 expectedType);
         }
 
+        public static ParseException ErrorElementNotSupported(this Ast ast)
+        {
+            return ErrorElementNotSupported(
+                ast.Extent,
+                ast.GetType().Name);
+        }
+
         public static ParseException ErrorElementNotSupported(this Ast ast, string displayName)
         {
             return ErrorElementNotSupported(ast.Extent, displayName);

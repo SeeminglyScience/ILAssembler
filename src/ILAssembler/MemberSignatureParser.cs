@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Management.Automation.Language;
 
 namespace ILAssembler
@@ -8,7 +10,7 @@ namespace ILAssembler
 
         protected TypedIdentifier? DeclaringType { get; private set; }
 
-        protected bool IsStatic { get; private set; }
+        protected bool IsStatic { get; set; }
 
         protected TypedIdentifier? ReturnType { get; private set; }
 
@@ -76,6 +78,11 @@ namespace ILAssembler
             IsStatic = memberExpressionAst.Static;
         }
 
+        protected virtual void VisitAnonymousSignature(ExpressionAst expressionAst)
+        {
+            throw expressionAst.ErrorUnexpectedType("MemberExpression");
+        }
+
         protected virtual void HandleUnresolvableSubject(ExpressionAst ast)
         {
             throw ast.GetParseError(
@@ -109,6 +116,20 @@ namespace ILAssembler
                     invokeMemberExpressionAst.Extent.StartScriptPosition.ToScriptExtent());
 
                 invokeMemberExpressionAst.Visit(_parent);
+            }
+
+            public override void VisitArrayExpression(ArrayExpressionAst arrayExpressionAst)
+            {
+                _parent.ReturnType = GetSignatureAndReset(
+                    arrayExpressionAst.Extent.StartScriptPosition.ToScriptExtent());
+                _parent.VisitAnonymousSignature(arrayExpressionAst);
+            }
+
+            public override void VisitParenExpression(ParenExpressionAst parenExpressionAst)
+            {
+                _parent.ReturnType = GetSignatureAndReset(
+                    parenExpressionAst.Extent.StartScriptPosition.ToScriptExtent());
+                _parent.VisitAnonymousSignature(parenExpressionAst);
             }
         }
     }
