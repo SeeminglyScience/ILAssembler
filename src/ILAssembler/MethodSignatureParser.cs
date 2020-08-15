@@ -67,38 +67,7 @@ namespace ILAssembler
         {
             base.VisitMemberImpl(memberExpressionAst);
             InvokeMemberExpressionAst invokeMemberExpressionAst = (InvokeMemberExpressionAst)memberExpressionAst;
-            if (invokeMemberExpressionAst.Arguments is null || invokeMemberExpressionAst.Arguments.Count == 0)
-            {
-                _genericArgs = Array.Empty<TypedIdentifier>();
-                _parameters = Array.Empty<TypedIdentifier>();
-                return;
-            }
-
-            int firstArgumentIndex = 0;
-            if (invokeMemberExpressionAst.Arguments[0] is TypeExpressionAst maybeGenericArgs
-                && maybeGenericArgs.TypeName is GenericTypeName maybeGenericArgsName
-                && maybeGenericArgsName.TypeName.Name.Equals("g", StringComparison.Ordinal))
-            {
-                firstArgumentIndex = 1;
-                _genericArgs = new TypedIdentifier[maybeGenericArgsName.GenericArguments.Count];
-                for (int i = 0; i < _genericArgs.Length; i++)
-                {
-                    _genericArgs[i] = TypeResolver.Resolve(maybeGenericArgsName.GenericArguments[i]);
-                }
-            }
-            else
-            {
-                _genericArgs = Array.Empty<TypedIdentifier>();
-            }
-
-            var typeParser = new TypeSignatureParser(NameExpectation.Allow, allowPinned: false, allowByRef: true);
-            _parameters = new TypedIdentifier[invokeMemberExpressionAst.Arguments.Count - firstArgumentIndex];
-            for (int i = 0; i < _parameters.Length; i++)
-            {
-                var argumentAst = invokeMemberExpressionAst.Arguments[i + firstArgumentIndex];
-                argumentAst.Visit(typeParser);
-                _parameters[i] = typeParser.GetSignatureAndReset(argumentAst.Extent);
-            }
+            HandleParameters(invokeMemberExpressionAst.Arguments);
         }
 
         protected override void HandleUnresolvableSubject(ExpressionAst ast)
@@ -114,6 +83,124 @@ namespace ILAssembler
             return extent.GetParseError(
                 "ExpectedMethodSignature",
                 "Expected method signature declaration, e.g. [ReturnType] [DeclaringType].MethodName([int] $optionalArgName)");
+        }
+
+        protected override void VisitAnonymousSignature(ExpressionAst expressionAst)
+        {
+            HandleUnresolvableSubject(expressionAst);
+            IsStatic = true;
+            PipelineAst pipe;
+            if (expressionAst is ArrayExpressionAst arrayExpressionAst)
+            {
+                if (arrayExpressionAst.SubExpression.Statements.Count == 0)
+                {
+                    HandleParameters();
+                    return;
+                }
+
+                if (arrayExpressionAst.SubExpression.Statements.Count > 1)
+                {
+                    throw arrayExpressionAst.SubExpression.Statements[1].Extent
+                        .StartScriptPosition
+                        .ToScriptExtent()
+                        .GetParseError(
+                            "MissingEndParenthesisInExpression",
+                            "Missing closing ')' in expression.");
+                }
+
+                if (arrayExpressionAst.SubExpression.Statements[0] is PipelineAst)
+                {
+                    pipe = (PipelineAst)arrayExpressionAst.SubExpression.Statements[0];
+                }
+                else
+                {
+                    throw arrayExpressionAst.SubExpression.Statements[0].ErrorElementNotSupported();
+                }
+            }
+            else if (expressionAst is ParenExpressionAst parenExpression)
+            {
+                if (parenExpression.Pipeline is not PipelineAst)
+                {
+                    throw parenExpression.Pipeline.ErrorElementNotSupported();
+                }
+
+                pipe = (PipelineAst)parenExpression.Pipeline;
+            }
+            else
+            {
+                throw expressionAst.ErrorElementNotSupported();
+            }
+
+            if (pipe.PipelineElements.Count == 0)
+            {
+                HandleParameters();
+                return;
+            }
+
+            if (pipe.PipelineElements.Count > 1)
+            {
+                throw pipe.PipelineElements[1].Extent
+                        .StartScriptPosition
+                        .ToScriptExtent()
+                        .GetParseError(
+                            "MissingEndParenthesisInExpression",
+                            "Missing closing ')' in expression.");
+            }
+
+            if (!(pipe.PipelineElements[0] is CommandExpressionAst commandExpression))
+            {
+                throw pipe.PipelineElements[0].ErrorElementNotSupported();
+            }
+
+            if (commandExpression.Expression is ArrayLiteralAst arrayLiteral)
+            {
+                HandleParameters(arrayLiteral.Elements);
+                return;
+            }
+
+            if (commandExpression.Expression is ConvertExpressionAst
+                || commandExpression.Expression is TypeExpressionAst)
+            {
+                HandleParameters(new[] { commandExpression.Expression });
+                return;
+            }
+
+            throw commandExpression.Expression.ErrorElementNotSupported();
+        }
+
+        private void HandleParameters(ReadOnlyListSegment<ExpressionAst> parameters = default)
+        {
+            if (parameters.Count == 0)
+            {
+                _genericArgs = Array.Empty<TypedIdentifier>();
+                _parameters = Array.Empty<TypedIdentifier>();
+                return;
+            }
+
+            if (parameters[0] is TypeExpressionAst maybeGenericArgs
+                && maybeGenericArgs.TypeName is GenericTypeName maybeGenericArgsName
+                && maybeGenericArgsName.TypeName.Name.Equals("g", StringComparison.Ordinal))
+            {
+                parameters = parameters[1..];
+                _genericArgs = new TypedIdentifier[maybeGenericArgsName.GenericArguments.Count];
+                for (int i = 0; i < _genericArgs.Length; i++)
+                {
+                    _genericArgs[i] = TypeResolver.Resolve(maybeGenericArgsName.GenericArguments[i]);
+                }
+            }
+            else
+            {
+                _genericArgs = Array.Empty<TypedIdentifier>();
+            }
+
+            var typeParser = new TypeSignatureParser(NameExpectation.Allow, allowPinned: false, allowByRef: true);
+            _parameters = new TypedIdentifier[parameters.Count];
+            for (int i = 0; i < _parameters.Length; i++)
+            {
+                var argumentAst = parameters[i];
+                argumentAst.Visit(typeParser);
+                _parameters[i] = typeParser.GetSignatureAndReset(argumentAst.Extent);
+            }
         }
     }
 }
