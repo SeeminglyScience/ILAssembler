@@ -71,7 +71,7 @@ namespace ILAssembler
                     funcArgs[i] = method.Parameters[i].GetModifiedType();
                 }
 
-                funcArgs[funcArgs.Length - 1] = returnType;
+                funcArgs[^1] = returnType;
                 return genericDelegate.MakeGenericType(funcArgs);
             }
 

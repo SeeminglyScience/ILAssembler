@@ -97,7 +97,7 @@ namespace ILAssembler.OpCodes
                         throw ExtentOps
                             .ExtentOf(
                                 ast.CommandElements[i + 1].Extent,
-                                ast.CommandElements[ast.CommandElements.Count - 1].Extent)
+                                ast.CommandElements[^1].Extent)
                             .GetParseError(
                                 "InvalidCalliArgument",
                                 "The instruction calli does not take any arguments after the method signature declaration.");
@@ -118,7 +118,7 @@ namespace ILAssembler.OpCodes
             if (signature is null)
             {
                 throw ErrorIncompleteCalli(
-                    ast.CommandElements[ast.CommandElements.Count - 1].Extent.EndScriptPosition.ToScriptExtent());
+                    ast.CommandElements[^1].Extent.EndScriptPosition.ToScriptExtent());
             }
 
             var blobEncoder = new BlobEncoder(new BlobBuilder());

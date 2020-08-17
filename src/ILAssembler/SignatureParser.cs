@@ -47,7 +47,7 @@ namespace ILAssembler
             {
                 var extentToThrow = ExtentOps.ExtentOf(
                     pipelineAst.PipelineElements[1].Extent,
-                    pipelineAst.PipelineElements[pipelineAst.PipelineElements.Count - 1].Extent);
+                    pipelineAst.PipelineElements[^1].Extent);
 
                 throw extentToThrow.ErrorElementNotSupported("|");
             }
