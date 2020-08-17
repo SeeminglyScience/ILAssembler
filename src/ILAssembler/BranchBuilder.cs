@@ -77,7 +77,7 @@ namespace ILAssembler
         public void Switch(LabelHandle[] labels)
         {
             _encoder.OpCode(ILOpCode.Switch);
-            _encoder.CodeBuilder.WriteCompressedInteger(labels.Length);
+            _encoder.CodeBuilder.WriteUInt32((uint)labels.Length);
             Span<int> offsets = stackalloc int[labels.Length];
             for (int i = 0; i < labels.Length; i++)
             {
