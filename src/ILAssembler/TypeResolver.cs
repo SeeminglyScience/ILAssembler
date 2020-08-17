@@ -86,7 +86,7 @@ namespace ILAssembler
 
             IScriptExtent extentToThrow = ExtentOps.ExtentOf(
                 typeName.GenericArguments[1].Extent,
-                typeName.GenericArguments[typeName.GenericArguments.Count - 1].Extent);
+                typeName.GenericArguments[^1].Extent);
 
             throw extentToThrow.GetParseError(
                 "SingleGenericArgumentExpected",

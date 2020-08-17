@@ -12,17 +12,14 @@ namespace ILAssembler
 
         public CilAssemblyContext(DynamicILInfo ilInfo)
         {
-            _encoder = new InstructionEncoder(
-                new BlobBuilder(),
-                new ControlFlowBuilder());
-
+            _encoder = new InstructionEncoder(new BlobBuilder());
+            BranchBuilder = new BranchBuilder(_encoder);
             ILInfo = ilInfo;
-            Branches = new Dictionary<string, LabelHandle>(StringComparer.Ordinal);
         }
 
         public DynamicILInfo ILInfo { get; }
 
-        public Dictionary<string, LabelHandle> Branches { get; }
+        public BranchBuilder BranchBuilder { get; }
 
         public string[]? Locals { get; set; }
 
@@ -30,14 +27,7 @@ namespace ILAssembler
 
         public LabelHandle GetOrAddLabel(string name)
         {
-            if (Branches.TryGetValue(name, out LabelHandle existingHandle))
-            {
-                return existingHandle;
-            }
-
-            var handle = Encoder.DefineLabel();
-            Branches.Add(name, handle);
-            return handle;
+            return BranchBuilder.GetOrCreateLabel(name);
         }
     }
 }

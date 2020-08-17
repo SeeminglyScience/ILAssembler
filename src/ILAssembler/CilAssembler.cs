@@ -28,24 +28,14 @@ namespace ILAssembler
             body.Visit(compiler);
 
             var dest = new BlobBuilder();
-            ControlFlowBuilder flow = compiler._context.Encoder.ControlFlowBuilder!;
-            if (compiler._context.Branches.Count > 0)
-            {
-                flow.CopyCodeAndFixupBranches(
-                    compiler._context.Encoder.CodeBuilder,
-                    dest);
-            }
-            else
-            {
-                compiler._context.Encoder.CodeBuilder.WriteContentTo(dest);
-            }
+            compiler._context.BranchBuilder.FixupCodeBuilder(dest);
 
             compiler._context.ILInfo.SetCode(
                 dest.ToArray(),
                 compiler._maxStack ?? 8);
 
             dest.Clear();
-            flow.SerializeExceptionTable(dest);
+            compiler._context.BranchBuilder.SerializeExceptionTable(dest);
             compiler._context.ILInfo.SetExceptions(dest.ToArray());
             if (compiler._context.Locals is null)
             {
@@ -73,15 +63,16 @@ namespace ILAssembler
 
         public override void VisitTryStatement(TryStatementAst tryStatementAst)
         {
-            var tryStart = _context.Encoder.DefineLabel();
-            var tryEnd = _context.Encoder.DefineLabel();
-            _context.Encoder.MarkLabel(tryStart);
+            var tryStart = _context.BranchBuilder.DefineLabel();
+            var tryEnd = _context.BranchBuilder.DefineLabel();
+            _context.BranchBuilder.MarkLabel(tryStart);
             foreach (StatementAst statement in tryStatementAst.Body.Statements)
             {
                 statement.Visit(this);
             }
 
-            _context.Encoder.MarkLabel(tryEnd);
+            LabelHandle? finallyStart = null;
+            _context.BranchBuilder.MarkLabel(tryEnd);
             foreach (CatchClauseAst clause in tryStatementAst.CatchClauses)
             {
                 Type catchType;
@@ -101,38 +92,48 @@ namespace ILAssembler
                 }
 
                 EntityHandle catchTypeHandle = _context.ILInfo.GetHandleFor(catchType.TypeHandle);
-                var catchStart = _context.Encoder.DefineLabel();
-                var catchEnd = _context.Encoder.DefineLabel();
-                _context.Encoder.MarkLabel(catchStart);
+                var catchStart = _context.BranchBuilder.DefineLabel();
+                var catchEnd = _context.BranchBuilder.DefineLabel();
+                _context.BranchBuilder.MarkLabel(catchStart);
                 foreach (StatementAst statement in clause.Body.Statements)
                 {
                     statement.Visit(this);
                 }
 
-                _context.Encoder.MarkLabel(catchEnd);
-                _context.Encoder.ControlFlowBuilder!.AddCatchRegion(
+                _context.BranchBuilder.MarkLabel(catchEnd);
+                _context.BranchBuilder.AddExceptionRegion(
+                    ExceptionRegionKind.Catch,
                     tryStart,
                     tryEnd,
                     catchStart,
                     catchEnd,
-                    catchTypeHandle);
+                    catchType: catchTypeHandle);
+
+                finallyStart = catchEnd;
             }
 
             if (tryStatementAst.Finally is not null)
             {
-                var finallyStart = _context.Encoder.DefineLabel();
-                var finallyEnd = _context.Encoder.DefineLabel();
-                _context.Encoder.MarkLabel(finallyStart);
+                if (finallyStart is null)
+                {
+                    finallyStart = _context.BranchBuilder.DefineLabel();
+                    _context.BranchBuilder.MarkLabel(finallyStart.Value);
+                }
+
+                // finallyStart ??= _context.BranchBuilder.DefineLabel();
+                var finallyEnd = _context.BranchBuilder.DefineLabel();
+                // _context.BranchBuilder.MarkLabel(finallyStart.Value);
                 foreach (StatementAst statement in tryStatementAst.Finally.Statements)
                 {
                     statement.Visit(this);
                 }
 
-                _context.Encoder.MarkLabel(finallyEnd);
-                _context.Encoder.ControlFlowBuilder!.AddFinallyRegion(
+                _context.BranchBuilder.MarkLabel(finallyEnd);
+                _context.BranchBuilder.AddExceptionRegion(
+                    ExceptionRegionKind.Finally,
                     tryStart,
-                    tryEnd,
-                    finallyStart,
+                    finallyStart.Value,
+                    finallyStart.Value,
                     finallyEnd);
             }
         }
@@ -158,7 +159,7 @@ namespace ILAssembler
             if (name[0] == ':')
             {
                 var label = _context.GetOrAddLabel(name.Substring(1));
-                _context.Encoder.MarkLabel(label);
+                _context.BranchBuilder.MarkLabel(label);
                 return;
             }
 
@@ -238,7 +239,7 @@ namespace ILAssembler
             {
                 var extentToThrow = ExtentOps.ExtentOf(
                     commandAst.CommandElements[3].Extent,
-                    commandAst.CommandElements[commandAst.CommandElements.Count - 1].Extent);
+                    commandAst.CommandElements[^1].Extent);
 
                 throw extentToThrow.GetParseError(
                     "UnexpectedArgument",

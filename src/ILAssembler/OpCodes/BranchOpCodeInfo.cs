@@ -14,7 +14,7 @@ namespace ILAssembler.OpCodes
             ast.AssertArgumentCount(1);
             if (ast.CommandElements[1] is StringConstantExpressionAst stringConstant)
             {
-                context.Encoder.Branch(
+                context.BranchBuilder.Branch(
                     OpCode,
                     context.GetOrAddLabel(stringConstant.Value));
 
