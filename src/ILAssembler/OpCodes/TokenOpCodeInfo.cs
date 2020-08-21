@@ -28,7 +28,8 @@ namespace ILAssembler.OpCodes
 
         protected virtual ILParseException ErrorExpectedSignature(Ast ast)
         {
-            return ast.GetParseError(
+            return Error.Parse(
+                ast,
                 ExpectedSignatureErrorId,
                 ExpectedSignatureMessage);
         }

@@ -76,9 +76,10 @@ namespace ILAssembler.OpCodes
                 : Array.IndexOf(context.Locals, variable.VariablePath.UserPath);
             if (index == -1)
             {
-                throw variable.GetParseError(
-                    "UndefinedLocal",
-                    "The specified local is not defined.");
+                throw Error.Parse(
+                    variable,
+                    nameof(Strings.UndefinedLocal),
+                    Strings.UndefinedLocal);
             }
 
             return index;

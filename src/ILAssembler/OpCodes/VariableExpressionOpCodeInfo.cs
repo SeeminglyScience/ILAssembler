@@ -25,7 +25,7 @@ namespace ILAssembler.OpCodes
             ast.AssertArgumentCount(1);
             if (!(ast.CommandElements[1] is VariableExpressionAst variable))
             {
-                throw ast.CommandElements[1].ErrorUnexpectedType("variable");
+                throw Error.UnexpectedType(ast.CommandElements[1], "variable");
             }
 
             var index = GetIndex(context, variable);

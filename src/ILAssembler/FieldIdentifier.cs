@@ -17,9 +17,7 @@ namespace ILAssembler
         {
             if (DeclaringType?.Type is null)
             {
-                throw subject.GetParseError(
-                    "MissingDeclaringType",
-                    "Unable to determine the declaring type.");
+                throw Error.MissingDeclaringType(subject);
             }
 
             FieldInfo? field = DeclaringType.Type.GetField(

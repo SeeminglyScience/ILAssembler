@@ -44,7 +44,8 @@ namespace ILAssembler
             }
             catch (Exception e)
             {
-                throw typeName.Extent.GetParseError(
+                throw Error.Parse(
+                    typeName.Extent,
                     "InvalidGenericArguments",
                     ExceptionDispatchInfo.Capture(e));
             }
@@ -71,9 +72,10 @@ namespace ILAssembler
 
         private static ParseException ErrorTypeNotFound(IScriptExtent extent)
         {
-            return extent.GetParseError(
-                "TypeNotFound",
-                "Unable to find type \"{0}\".",
+            return Error.Parse(
+                extent,
+                nameof(Strings.TypeNotFound),
+                Strings.TypeNotFound,
                 extent.Text);
         }
 
@@ -88,9 +90,10 @@ namespace ILAssembler
                 typeName.GenericArguments[1].Extent,
                 typeName.GenericArguments[^1].Extent);
 
-            throw extentToThrow.GetParseError(
-                "SingleGenericArgumentExpected",
-                "The modifier type \"{0}\" expects only a single generic argument.",
+            throw Error.Parse(
+                extentToThrow,
+                nameof(Strings.SingleGenericArgumentExpected),
+                Strings.SingleGenericArgumentExpected,
                 typeName.TypeName);
         }
     }

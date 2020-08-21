@@ -69,9 +69,10 @@ namespace ILAssembler
 
             if (!(memberExpressionAst.Member is StringConstantExpressionAst stringConstant))
             {
-                throw memberExpressionAst.Member.GetParseError(
-                    "ExpectedStringConstant",
-                    "Member name must be a constant value.");
+                throw Error.Parse(
+                    memberExpressionAst.Member,
+                    nameof(Strings.ExpectedConstantMemberName),
+                    Strings.ExpectedConstantMemberName);
             }
 
             Name = stringConstant.Value;
@@ -80,14 +81,15 @@ namespace ILAssembler
 
         protected virtual void VisitAnonymousSignature(ExpressionAst expressionAst)
         {
-            throw expressionAst.ErrorUnexpectedType("MemberExpression");
+            throw Error.UnexpectedType(expressionAst, "MemberExpression");
         }
 
         protected virtual void HandleUnresolvableSubject(ExpressionAst ast)
         {
-            throw ast.GetParseError(
-                "ExpectedTypeExpression",
-                "Member expression subject must be a resolvable type expression.");
+            throw Error.Parse(
+                ast,
+                nameof(Strings.ExpectedTypeExpression),
+                Strings.ExpectedTypeExpression);
         }
 
         protected abstract ILParseException ErrorExpectedSignature(IScriptExtent extent);

@@ -15,10 +15,7 @@ namespace ILAssembler.OpCodes
         {
             if (ast.CommandElements.Count < 2)
             {
-                throw ast.CommandElements[0].Extent.EndScriptPosition.ToScriptExtent()
-                    .GetParseError(
-                        "IncompleteCalli",
-                        "Expected calli signature, e.g. calli unmanaged stdcall { [ReturnType] $_::_([ParameterType]) }");
+                throw Error.IncompleteCalli(ast.CommandElements[0].Extent.EndScriptPosition.ToScriptExtent());
             }
 
             SignatureCallingConvention? callingConvention = null;
@@ -30,9 +27,10 @@ namespace ILAssembler.OpCodes
                 {
                     if (callingConvention is not null)
                     {
-                        throw stringConstant.GetParseError(
-                            "UnexpectedCallingConvention",
-                            "A calling convention was already specified for this call site.");
+                        throw Error.Parse(
+                            stringConstant,
+                            nameof(Strings.UnexpectedCallingConvention),
+                            Strings.UnexpectedCallingConvention);
                     }
 
                     if (stringConstant.Value.Equals("vararg", StringComparison.Ordinal))
@@ -52,7 +50,7 @@ namespace ILAssembler.OpCodes
                         i++;
                         if (i >= ast.CommandElements.Count || !(ast.CommandElements[i] is StringConstantExpressionAst nextString))
                         {
-                            throw ErrorIncompleteCalli(
+                            throw Error.IncompleteCalli(
                                 stringConstant.Extent.EndScriptPosition.ToScriptExtent());
                         }
 
@@ -80,27 +78,28 @@ namespace ILAssembler.OpCodes
                             continue;
                         }
 
-                        throw nextString.GetParseError(
-                            "UnknownUnmanagedCallingConvention",
-                            "Expected an unmanaged calling convention of cdecl, stdcall, thiscall, or fastcall.");
+                        throw Error.Parse(
+                            nextString,
+                            nameof(Strings.UnknownUnmanagedCallingConvention),
+                            Strings.UnknownUnmanagedCallingConvention);
                     }
 
-                    throw stringConstant.GetParseError(
-                        "UnknownCallingConvention",
-                        "Expected a calling convention of default, vararg, or unmanaged (cdecl, stdcall, thiscall, or fastcall).");
+                    throw Error.Parse(
+                        stringConstant,
+                        nameof(Strings.UnknownCallingConvention),
+                        Strings.UnknownCallingConvention);
                 }
 
                 if (ast.CommandElements[i] is ScriptBlockExpressionAst scriptBlockExpression)
                 {
                     if (i != ast.CommandElements.Count - 1)
                     {
-                        throw ExtentOps
-                            .ExtentOf(
+                        throw Error.Parse(
+                            ExtentOps.ExtentOf(
                                 ast.CommandElements[i + 1].Extent,
-                                ast.CommandElements[^1].Extent)
-                            .GetParseError(
-                                "InvalidCalliArgument",
-                                "The instruction calli does not take any arguments after the method signature declaration.");
+                                ast.CommandElements[^1].Extent),
+                            nameof(Strings.InvalidCalliArgument),
+                            Strings.InvalidCalliArgument);
                     }
 
                     callingConvention ??= SignatureCallingConvention.Default;
@@ -117,7 +116,7 @@ namespace ILAssembler.OpCodes
 
             if (signature is null)
             {
-                throw ErrorIncompleteCalli(
+                throw Error.IncompleteCalli(
                     ast.CommandElements[^1].Extent.EndScriptPosition.ToScriptExtent());
             }
 
@@ -164,13 +163,6 @@ namespace ILAssembler.OpCodes
             var token = context.ILInfo.GetTokenFor(blobEncoder.Builder.ToArray());
             context.Encoder.OpCode(ILOpCode.Calli);
             context.Encoder.Token(token);
-        }
-
-        private static ILParseException ErrorIncompleteCalli(IScriptExtent subject)
-        {
-            return subject.GetParseError(
-                "IncompleteCalli",
-                "Expected calli signature, e.g. calli unmanaged stdcall { [ReturnType] $_::_([ParameterType]) }");
         }
     }
 }

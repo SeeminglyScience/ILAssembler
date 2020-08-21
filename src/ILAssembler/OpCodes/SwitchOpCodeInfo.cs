@@ -24,9 +24,10 @@ namespace ILAssembler.OpCodes
             }
             else
             {
-                throw ast.GetParseError(
-                    "MissingBranches",
-                    "Expected an array literal of branch names.");
+                throw Error.Parse(
+                    ast,
+                    nameof(Strings.MissingBranches),
+                    Strings.MissingBranches);
             }
 
             var labels = new LabelHandle[branches.Count];
@@ -34,9 +35,10 @@ namespace ILAssembler.OpCodes
             {
                 if (!(branches[i] is StringConstantExpressionAst branchName))
                 {
-                    throw branches[i].GetParseError(
-                        "MissingBranch",
-                        "Expected branch name.");
+                    throw Error.Parse(
+                        branches[i],
+                        nameof(Strings.MissingBranchName),
+                        Strings.MissingBranchName);
                 }
 
                 labels[i] = context.GetOrAddLabel(branchName.Value);

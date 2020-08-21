@@ -6,26 +6,25 @@ namespace ILAssembler
     {
         public override MemberIdentifier GetMemberIdentifier(IScriptExtent subject)
         {
-
             if (DeclaringType is null)
             {
-                throw subject.GetParseError(
-                    "DeclaringTypeNotFound",
-                    "Unable to determine declaring type.");
+                throw Error.MissingDeclaringType(subject);
             }
 
             if (ReturnType is null)
             {
-                throw subject.GetParseError(
-                    "FieldTypeNotFound",
-                    "Unable to determine field type.");
+                throw Error.Parse(
+                    subject,
+                    nameof(Strings.FieldTypeNotFound),
+                    Strings.FieldTypeNotFound);
             }
 
             if (Name is null)
             {
-                throw subject.GetParseError(
-                    "FieldNameNotFound",
-                    "Unable to determine field name.");
+                throw Error.Parse(
+                    subject,
+                    nameof(Strings.FieldNameNotFound),
+                    Strings.FieldNameNotFound);
             }
 
             var result = new FieldIdentifier(
@@ -45,9 +44,10 @@ namespace ILAssembler
 
         protected override ILParseException ErrorExpectedSignature(IScriptExtent extent)
         {
-            return extent.GetParseError(
-                "ExpectedFieldSignature",
-                "Expected field signature declaration, e.g. [FieldType] [DeclaringType]._fieldName");
+            return Error.Parse(
+                extent,
+                nameof(Strings.ExpectedFieldSignature),
+                Strings.ExpectedFieldSignature);
         }
     }
 }
