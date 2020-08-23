@@ -10,9 +10,10 @@ namespace ILAssembler
 
         protected virtual ILParseException ErrorUnexpectedNode(IScriptExtent extent)
         {
-            return extent.GetParseError(
-                "UnexpectedNode",
-                "Unexpected element type.");
+            return Error.Parse(
+                extent,
+                nameof(Strings.UnexpectedNode),
+                Strings.UnexpectedNode);
         }
 
         public virtual void VisitArrayExpression(ArrayExpressionAst arrayExpressionAst) => DefaultVisit(arrayExpressionAst);

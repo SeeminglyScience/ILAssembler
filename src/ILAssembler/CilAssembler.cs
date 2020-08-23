@@ -82,9 +82,10 @@ namespace ILAssembler
                 }
                 else if (clause.CatchTypes.Count > 1)
                 {
-                    throw clause.CatchTypes[1].GetParseError(
-                        "MultipleCatchTypesNotSupported",
-                        "Only one catch type can be specified.");
+                    throw Error.Parse(
+                        clause.CatchTypes[1],
+                        nameof(Strings.MultipleCatchTypesNotSupported),
+                        Strings.MultipleCatchTypesNotSupported);
                 }
                 else
                 {
@@ -120,9 +121,7 @@ namespace ILAssembler
                     _context.BranchBuilder.MarkLabel(finallyStart.Value);
                 }
 
-                // finallyStart ??= _context.BranchBuilder.DefineLabel();
                 var finallyEnd = _context.BranchBuilder.DefineLabel();
-                // _context.BranchBuilder.MarkLabel(finallyStart.Value);
                 foreach (StatementAst statement in tryStatementAst.Finally.Statements)
                 {
                     statement.Visit(this);
@@ -165,9 +164,10 @@ namespace ILAssembler
 
             if (!OpCodeStore.TryGetOpCodeInfo(name, out OpCodeInfo? info))
             {
-                throw commandAst.CommandElements[0].GetParseError(
-                    "UnrecognizedOpCode",
-                    "Unrecognized CIL instruction.");
+                throw Error.Parse(
+                    commandAst.CommandElements[0],
+                    nameof(Strings.UnrecognizedOpCode),
+                    Strings.UnrecognizedOpCode);
             }
 
             info!.Emit(_context, commandAst);
@@ -180,9 +180,10 @@ namespace ILAssembler
             {
                 if (_maxStack is not null)
                 {
-                    throw commandAst.GetParseError(
-                        "MaxStackAlreadySpecified",
-                        "Max stack size must be declared only once.");
+                    throw Error.Parse(
+                        commandAst,
+                        nameof(Strings.MaxStackAlreadySpecified),
+                        Strings.MaxStackAlreadySpecified);
                 }
 
                 commandAst.AssertArgumentCount(1);
@@ -194,9 +195,10 @@ namespace ILAssembler
             {
                 if (_context.Locals is not null)
                 {
-                    throw commandAst.CommandElements[0].GetParseError(
-                        "LocalsAlreadySpecified",
-                        "Locals must be declared only once.");
+                    throw Error.Parse(
+                        commandAst.CommandElements[0],
+                        nameof(Strings.LocalsAlreadySpecified),
+                        Strings.LocalsAlreadySpecified);
                 }
 
                 ReadLocals(commandAst);
@@ -216,9 +218,10 @@ namespace ILAssembler
                     || stringConstant.StringConstantType != StringConstantType.BareWord
                     || !stringConstant.Value.Equals("init", StringComparison.Ordinal))
                 {
-                    throw commandAst.CommandElements[1].GetParseError(
-                        "UnexpectedLocalsKeyword",
-                        "Expected either bareword \"init\" modifier or locals body.");
+                    throw Error.Parse(
+                        commandAst.CommandElements[1],
+                        nameof(Strings.UnexpectedLocalsKeyword),
+                        Strings.UnexpectedLocalsKeyword);
                 }
 
                 _context.ILInfo.DynamicMethod.InitLocals = true;
@@ -230,10 +233,10 @@ namespace ILAssembler
             }
             else if (commandAst.CommandElements.Count == 1)
             {
-                throw commandAst.Extent.EndScriptPosition.ToScriptExtent()
-                    .GetParseError(
-                        "MissingLocalsBody",
-                        "Missing locals declaration body.");
+                throw Error.Parse(
+                    commandAst.Extent.EndScriptPosition.ToScriptExtent(),
+                    nameof(Strings.MissingLocalsBody),
+                    Strings.MissingLocalsBody);
             }
             else
             {
@@ -241,14 +244,15 @@ namespace ILAssembler
                     commandAst.CommandElements[3].Extent,
                     commandAst.CommandElements[^1].Extent);
 
-                throw extentToThrow.GetParseError(
-                    "UnexpectedArgument",
-                    "Unexpected argument in locals declaration.");
+                throw Error.Parse(
+                    extentToThrow,
+                    nameof(Strings.UnexpectedLocalsArgument),
+                    Strings.UnexpectedLocalsArgument);
             }
 
             if (!(body is ScriptBlockExpressionAst sbExpression))
             {
-                throw body.ErrorUnexpectedType(nameof(ScriptBlock));
+                throw Error.UnexpectedType(body, nameof(ScriptBlock));
             }
 
             TypedIdentifier[] locals = LocalSignatureParser.ParseLocals(sbExpression.ScriptBlock);
@@ -293,7 +297,10 @@ namespace ILAssembler
                 return name;
             }
 
-            throw commandAst.GetParseError("CannotReadCommandName", "Unable to determine element name.");
+            throw Error.Parse(
+                commandAst,
+                nameof(Strings.CannotReadCommandName),
+                Strings.CannotReadCommandName);
         }
     }
 }

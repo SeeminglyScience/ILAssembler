@@ -8,22 +8,22 @@ namespace ILAssembler
         {
             if (scriptBlockAst.ParamBlock is not null)
             {
-                throw scriptBlockAst.ParamBlock.ErrorElementNotSupported("param");
+                throw Error.ElementNotSupported(scriptBlockAst.ParamBlock, "param");
             }
 
             if (scriptBlockAst.DynamicParamBlock is not null)
             {
-                throw scriptBlockAst.DynamicParamBlock.ErrorElementNotSupported("dynamicparam");
+                throw Error.ElementNotSupported(scriptBlockAst.DynamicParamBlock, "dynamicparam");
             }
 
             if (scriptBlockAst.BeginBlock is not null)
             {
-                throw scriptBlockAst.BeginBlock.ErrorElementNotSupported("begin");
+                throw Error.ElementNotSupported(scriptBlockAst.BeginBlock, "begin");
             }
 
             if (scriptBlockAst.ProcessBlock is not null)
             {
-                throw scriptBlockAst.ProcessBlock.ErrorElementNotSupported("process");
+                throw Error.ElementNotSupported(scriptBlockAst.ProcessBlock, "process");
             }
 
             scriptBlockAst.EndBlock.Visit(this);
@@ -33,9 +33,10 @@ namespace ILAssembler
         {
             if (namedBlockAst.Statements.Count > 1)
             {
-                throw namedBlockAst.Statements[1].GetParseError(
-                    "InvalidStatementCount",
-                    "Expected only one statement in this signature declaration.");
+                throw Error.Parse(
+                    namedBlockAst.Statements[1],
+                    nameof(Strings.InvalidStatementCount),
+                    Strings.InvalidStatementCount);
             }
 
             namedBlockAst.Statements[0].Visit(this);
@@ -49,7 +50,7 @@ namespace ILAssembler
                     pipelineAst.PipelineElements[1].Extent,
                     pipelineAst.PipelineElements[^1].Extent);
 
-                throw extentToThrow.ErrorElementNotSupported("|");
+                throw Error.ElementNotSupported(extentToThrow, "|");
             }
 
             pipelineAst.PipelineElements[0].Visit(this);

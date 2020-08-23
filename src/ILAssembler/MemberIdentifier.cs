@@ -22,9 +22,10 @@ namespace ILAssembler
 
         protected virtual ILParseException ErrorMemberNotFound(IScriptExtent subject)
         {
-            return subject.GetParseError(
-                "MemberNotFound",
-                "Unable to resolve signature.");
+            return Error.Parse(
+                subject,
+                nameof(Strings.MemberNotFound),
+                Strings.MemberNotFound);
         }
 
         protected virtual BindingFlags GetFlags()

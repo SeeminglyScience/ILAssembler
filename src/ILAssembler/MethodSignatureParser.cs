@@ -23,9 +23,10 @@ namespace ILAssembler
         {
             if (ReturnType is null)
             {
-                throw subject.GetParseError(
-                    "ReturnTypeNotFound",
-                    "Unable to determine return type.");
+                throw Error.Parse(
+                    subject,
+                    nameof(Strings.ReturnTypeNotFound),
+                    Strings.ReturnTypeNotFound);
             }
 
             bool isCtor = !_rejectCtor
@@ -80,9 +81,10 @@ namespace ILAssembler
 
         protected override ILParseException ErrorExpectedSignature(IScriptExtent extent)
         {
-            return extent.GetParseError(
-                "ExpectedMethodSignature",
-                "Expected method signature declaration, e.g. [ReturnType] [DeclaringType].MethodName([int] $optionalArgName)");
+            return Error.Parse(
+                extent,
+                nameof(Strings.ExpectedMethodSignature),
+                Strings.ExpectedMethodSignature);
         }
 
         protected override void VisitAnonymousSignature(ExpressionAst expressionAst)
@@ -100,12 +102,10 @@ namespace ILAssembler
 
                 if (arrayExpressionAst.SubExpression.Statements.Count > 1)
                 {
-                    throw arrayExpressionAst.SubExpression.Statements[1].Extent
-                        .StartScriptPosition
-                        .ToScriptExtent()
-                        .GetParseError(
-                            "MissingEndParenthesisInExpression",
-                            "Missing closing ')' in expression.");
+                    throw Error.Parse(
+                        arrayExpressionAst.SubExpression.Statements[1].Extent.StartScriptPosition.ToScriptExtent(),
+                        nameof(Strings.MissingEndParenthesisInExpression),
+                        Strings.MissingEndParenthesisInExpression);
                 }
 
                 if (arrayExpressionAst.SubExpression.Statements[0] is PipelineAst)
@@ -114,21 +114,21 @@ namespace ILAssembler
                 }
                 else
                 {
-                    throw arrayExpressionAst.SubExpression.Statements[0].ErrorElementNotSupported();
+                    throw Error.ElementNotSupported(arrayExpressionAst.SubExpression.Statements[0]);
                 }
             }
             else if (expressionAst is ParenExpressionAst parenExpression)
             {
                 if (parenExpression.Pipeline is not PipelineAst)
                 {
-                    throw parenExpression.Pipeline.ErrorElementNotSupported();
+                    throw Error.ElementNotSupported(parenExpression.Pipeline);
                 }
 
                 pipe = (PipelineAst)parenExpression.Pipeline;
             }
             else
             {
-                throw expressionAst.ErrorElementNotSupported();
+                throw Error.ElementNotSupported(expressionAst);
             }
 
             if (pipe.PipelineElements.Count == 0)
@@ -139,17 +139,13 @@ namespace ILAssembler
 
             if (pipe.PipelineElements.Count > 1)
             {
-                throw pipe.PipelineElements[1].Extent
-                        .StartScriptPosition
-                        .ToScriptExtent()
-                        .GetParseError(
-                            "MissingEndParenthesisInExpression",
-                            "Missing closing ')' in expression.");
+                throw Error.MissingEndParenthesisInExpression(
+                    pipe.PipelineElements[1].Extent.StartScriptPosition.ToScriptExtent());
             }
 
             if (!(pipe.PipelineElements[0] is CommandExpressionAst commandExpression))
             {
-                throw pipe.PipelineElements[0].ErrorElementNotSupported();
+                throw Error.ElementNotSupported(pipe.PipelineElements[0]);
             }
 
             if (commandExpression.Expression is ArrayLiteralAst arrayLiteral)
@@ -165,7 +161,7 @@ namespace ILAssembler
                 return;
             }
 
-            throw commandExpression.Expression.ErrorElementNotSupported();
+            throw Error.ElementNotSupported(commandExpression.Expression);
         }
 
         private void HandleParameters(ReadOnlyListSegment<ExpressionAst> parameters = default)

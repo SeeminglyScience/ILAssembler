@@ -31,9 +31,10 @@ namespace ILAssembler
 
             if (DeclaringType?.Type is null)
             {
-                throw subject.GetParseError(
-                    "MissingDeclaringType",
-                    "Unable to determine the declaring type.");
+                throw Error.Parse(
+                    subject,
+                    nameof(Strings.MissingDeclaringType),
+                    Strings.MissingDeclaringType);
             }
 
             ConstructorInfo? resolvedCtor = DeclaringType.Type.GetConstructor(

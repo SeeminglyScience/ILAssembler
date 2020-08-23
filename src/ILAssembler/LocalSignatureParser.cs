@@ -54,9 +54,10 @@ namespace ILAssembler
             TypedIdentifier identifier = _signatureParser.GetSignatureAndReset(convertExpressionAst.Extent);
             if (!_usedNames.Add(identifier.Name))
             {
-                throw convertExpressionAst.GetParseError(
-                    "DuplicatedIdentifier",
-                    "The identifier \"{0}\" has already been used.",
+                throw Error.Parse(
+                    convertExpressionAst,
+                    nameof(Strings.LocalAlreadyDefined),
+                    Strings.LocalAlreadyDefined,
                     identifier.Name);
             }
 

@@ -14,7 +14,7 @@ namespace ILAssembler.OpCodes
             ast.AssertArgumentCount(1);
             if (!(ast.CommandElements[1] is StringConstantExpressionAst stringConstant))
             {
-                throw ast.CommandElements[1].ErrorUnexpectedType("string");
+                throw Error.UnexpectedType(ast.CommandElements[1], "string");
             }
 
             var token = context.ILInfo.GetTokenFor(stringConstant.Value);

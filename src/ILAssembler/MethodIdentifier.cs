@@ -63,9 +63,10 @@ namespace ILAssembler
             var method = GetMethod(subject);
             if (method.DeclaringType is null)
             {
-                throw subject.GetParseError(
-                    "InvalidDeclaringType",
-                    "Unable to determine declaring type for the specified method.");
+                throw Error.Parse(
+                    subject,
+                    nameof(Strings.MissingDeclaringType),
+                    Strings.MissingDeclaringType);
             }
 
             if (method.DeclaringType.IsGenericType)
@@ -80,9 +81,10 @@ namespace ILAssembler
         {
             if (DeclaringType?.Type is null)
             {
-                throw subject.GetParseError(
-                    "MissingDeclaringType",
-                    "Unable to determine the method's declaring type.");
+                throw Error.Parse(
+                    subject,
+                    nameof(Strings.MissingDeclaringType),
+                    Strings.MissingDeclaringType);
             }
 
             if (GenericArgs.Length == 0)
@@ -134,7 +136,8 @@ namespace ILAssembler
                 }
                 catch (Exception e)
                 {
-                    throw subject.GetParseError(
+                    throw Error.Parse(
+                        subject,
                         "InvalidGenericArgs",
                         ExceptionDispatchInfo.Capture(e));
                 }

@@ -31,16 +31,18 @@ namespace ILAssembler
         {
             if (_type is null)
             {
-                throw subject.GetParseError(
-                    "MissingType",
-                    "Missing type declaration.");
+                throw Error.Parse(
+                    subject,
+                    nameof(Strings.MissingTypeSpecification),
+                    Strings.MissingTypeSpecification);
             }
 
             if (_name is null && _nameKind == NameExpectation.Require)
             {
-                throw subject.GetParseError(
-                    "MissingSignatureName",
-                    "Missing variable name.");
+                throw Error.Parse(
+                    subject,
+                    nameof(Strings.MissingSignatureIdentifier),
+                    Strings.MissingSignatureIdentifier);
             }
 
             var result = (_type, _name, _isPinned, _isByRef);
@@ -55,9 +57,10 @@ namespace ILAssembler
         {
             if (_nameKind == NameExpectation.Reject)
             {
-                throw variableExpressionAst.GetParseError(
-                    "ExpectedTypeExpression",
-                    "Expected type expression but found variable expression.");
+                throw Error.Parse(
+                    variableExpressionAst,
+                    nameof(Strings.ExpectedTypeExpression),
+                    Strings.ExpectedTypeExpression);
             }
 
             _name = variableExpressionAst.VariablePath.UserPath;
@@ -70,9 +73,10 @@ namespace ILAssembler
             {
                 if (!_allowByRef)
                 {
-                    throw typeName.Extent.GetParseError(
-                        "ByRefNotSupported",
-                        "ByRef types are not supported in this signature kind.");
+                    throw Error.Parse(
+                        typeName.Extent,
+                        nameof(Strings.ByRefNotSupported),
+                        Strings.ByRefNotSupported);
                 }
 
                 if (_isByRef)
@@ -89,9 +93,10 @@ namespace ILAssembler
             {
                 if (!_allowPinned)
                 {
-                    throw typeName.Extent.GetParseError(
-                        "PinnedNotSupported",
-                        "Pinned types are not supported in this signature kind.");
+                    throw Error.Parse(
+                        typeName.Extent,
+                        nameof(Strings.PinnedNotSupported),
+                        Strings.PinnedNotSupported);
                 }
 
                 if (_isPinned)
@@ -106,9 +111,10 @@ namespace ILAssembler
 
             if (_type is not null)
             {
-                throw convertExpressionAst.GetParseError(
-                    "TypeAlreadySpecified",
-                    "The type must be specified only once.");
+                throw Error.Parse(
+                    convertExpressionAst,
+                    nameof(Strings.TypeAlreadySpecified),
+                    Strings.TypeAlreadySpecified);
             }
 
             _type = TypeResolver.Resolve(typeName);
@@ -120,16 +126,18 @@ namespace ILAssembler
         {
             if (_nameKind == NameExpectation.Require)
             {
-                throw typeExpressionAst.GetParseError(
-                    "ExpectedVariableExpression",
-                    "Expected variable expression but found type expression.");
+                throw Error.Parse(
+                    typeExpressionAst,
+                    nameof(Strings.ExpectedVariableExpression),
+                    Strings.ExpectedVariableExpression);
             }
 
             if (_type is not null)
             {
-                throw typeExpressionAst.GetParseError(
-                    "TypeAlreadySpecified",
-                    "The type must be specified only once.");
+                throw Error.Parse(
+                    typeExpressionAst,
+                    nameof(Strings.TypeAlreadySpecified),
+                    Strings.TypeAlreadySpecified);
             }
 
             _type = TypeResolver.Resolve(typeExpressionAst.TypeName);
@@ -137,9 +145,10 @@ namespace ILAssembler
 
         private static ParseException ErrorDuplicateModifier(IScriptExtent extent, string modifierName)
         {
-            return extent.GetParseError(
-                "DuplicateLocalModifier",
-                "The modifier \"{0}\" must be specified only once.",
+            return Error.Parse(
+                extent,
+                nameof(Strings.LocalsModAlreadySpecified),
+                Strings.LocalsModAlreadySpecified,
                 modifierName);
         }
     }
