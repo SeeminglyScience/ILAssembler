@@ -1,3 +1,5 @@
+# .ExternalHelp ILAssembler-help.xml
+
 if ($PSVersionTable.PSVersion.Major -eq 5) {
     Microsoft.PowerShell.Core\Import-Module $PSScriptRoot\Desktop\ILAssembler.dll -ErrorAction Stop
 } else {
