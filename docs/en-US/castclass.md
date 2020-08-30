@@ -13,7 +13,7 @@ Attempts to cast an object passed by reference to the specified class.
 ## SYNTAX
 
 ```powershell
-castclass
+castclass <signature>
 ```
 
 ## DESCRIPTION
@@ -37,6 +37,24 @@ The following table lists the instruction's hexadecimal and Microsoft Intermedia
  `System.InvalidCastException` is thrown if obj cannot be cast to class.
 
  `System.TypeLoadException` is thrown if class cannot be found. This is typically detected when a Microsoft Intermediate Language (MSIL) instruction is converted to native code rather than at runtime.
+
+## PARAMETERS
+
+### -signature
+
+Specifies the target signature.
+
+```yaml
+Type: signature
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ## INPUTS
 

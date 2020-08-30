@@ -13,7 +13,7 @@ Constrains the type on which a virtual method call is made.
 ## SYNTAX
 
 ```powershell
-constrained.
+constrained. <signature>
 ```
 
 ## DESCRIPTION
@@ -51,6 +51,24 @@ The following table lists the instruction's hexadecimal and Microsoft intermedia
  Using the `constrained.` prefix also avoids potential versioning problems with value types. If the `constrained.` prefix is not used, different IL must be emitted depending on whether or not a value type overrides a method of `System.Object`. For example, if a value type `V` overrides the `Object.ToString()` method, a `call` `V.ToString()` instruction is emitted; if it does not, a `box` instruction and a `callvirt` `Object.ToString()` instruction are emitted. A versioning problem can arise in the former case if the override is later removed, and in the latter case if an override is later added.
 
  The `constrained.` prefix can also be used for invocation of interface methods on value types, because the value type method implementing the interface method can be changed using a `MethodImpl`. If the `constrained.` prefix is not used, the compiler is forced to choose which of the value type's methods to bind to at compile time. Using the `constrained.` prefix allows the MSIL to bind to the method that implements the interface method at run time, rather than at compile time.
+
+## PARAMETERS
+
+### -signature
+
+Specifies the target signature.
+
+```yaml
+Type: signature
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ## INPUTS
 

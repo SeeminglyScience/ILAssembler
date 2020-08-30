@@ -13,7 +13,7 @@ Creates a new object or a new instance of a value type, pushing an object refere
 ## SYNTAX
 
 ```powershell
-newobj
+newobj <signature>
 ```
 
 ## DESCRIPTION
@@ -45,6 +45,24 @@ The following table lists the instruction's hexadecimal and Microsoft Intermedia
  `System.OutOfMemoryException` is thrown if there is insufficient memory to satisfy the request.
 
  `System.MissingMethodException` is thrown if a constructor method `ctor` with the indicated name, class and signature could not be found. This is typically detected when Microsoft Intermediate Language (MSIL) instructions are converted to native code, rather than at runtime.
+
+## PARAMETERS
+
+### -signature
+
+Specifies the target signature.
+
+```yaml
+Type: signature
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ## INPUTS
 

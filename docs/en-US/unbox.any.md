@@ -13,7 +13,7 @@ Converts the boxed representation of a type specified in the instruction to its 
 ## SYNTAX
 
 ```powershell
-unbox.any
+unbox.any <signature>
 ```
 
 ## DESCRIPTION
@@ -41,6 +41,24 @@ The following table lists the instruction's hexadecimal and Microsoft intermedia
  `System.InvalidCastException` is thrown if `obj` is not a boxed type.
 
  `System.NullReferenceException` is thrown if `obj` is a null reference.
+
+## PARAMETERS
+
+### -signature
+
+Specifies the target signature.
+
+```yaml
+Type: signature
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ## INPUTS
 

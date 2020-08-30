@@ -13,7 +13,7 @@ Loads the address of the array element at a specified array index onto the top o
 ## SYNTAX
 
 ```powershell
-ldelema
+ldelema <signature>
 ```
 
 ## DESCRIPTION
@@ -45,6 +45,24 @@ The following table lists the instruction's hexadecimal and Microsoft Intermedia
  `System.ArrayTypeMismatchException` is thrown if `array` does not hold elements of the required type.
 
  `System.IndexOutOfRangeException` is thrown if `index` is negative, or larger than the bound of `array`.
+
+## PARAMETERS
+
+### -signature
+
+Specifies the target signature.
+
+```yaml
+Type: signature
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ## INPUTS
 

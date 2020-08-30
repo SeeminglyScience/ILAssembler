@@ -13,7 +13,7 @@ Transfers control to a target instruction (short form) if two values are equal.
 ## SYNTAX
 
 ```powershell
-beq.s
+beq.s <branch_name>
 ```
 
 ## DESCRIPTION
@@ -39,6 +39,24 @@ The following table lists the instruction's hexadecimal and Microsoft Intermedia
  If the target instruction has one or more prefix codes, control can only be transferred to the first of these prefixes.
 
  Control transfers into and out of `try`, `catch`, `filter`, and `finally` blocks cannot be performed by this instruction (such transfers are severely restricted and must use the `leave` instruction instead).
+
+## PARAMETERS
+
+### -branch
+
+Specifies the label representing the target offset.
+
+```yaml
+Type: branch_name
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ## INPUTS
 

@@ -13,7 +13,7 @@ Converts the boxed representation of a value type to its unboxed form.
 ## SYNTAX
 
 ```powershell
-unbox
+unbox <signature>
 ```
 
 ## DESCRIPTION
@@ -47,6 +47,24 @@ The following table lists the instruction's hexadecimal and Microsoft Intermedia
  `System.NullReferenceException` is thrown if the object reference is a null reference.
 
  `System.TypeLoadException` is thrown if the value type `valType` cannot be found. This is typically detected when Microsoft Intermediate Language (MSIL) instructions are converted to native code, rather than at runtime.
+
+## PARAMETERS
+
+### -signature
+
+Specifies the target signature.
+
+```yaml
+Type: signature
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ## INPUTS
 

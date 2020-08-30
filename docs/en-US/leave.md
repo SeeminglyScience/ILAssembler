@@ -13,7 +13,7 @@ Exits a protected region of code, unconditionally transferring control to a spec
 ## SYNTAX
 
 ```powershell
-leave
+leave <branch_name>
 ```
 
 ## DESCRIPTION
@@ -33,6 +33,24 @@ The following table lists the instruction's hexadecimal and Microsoft Intermedia
  You cannot use a `leave` instruction to exit a `finally` block. To ease code generation for exception handlers it is valid from within a catch block to use a `leave` instruction to transfer control to any instruction within the associated `try` block.
 
  If an instruction has one or more prefix codes, control can only be transferred to the first of these prefixes.
+
+## PARAMETERS
+
+### -branch
+
+Specifies the label representing the target offset.
+
+```yaml
+Type: branch_name
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ## INPUTS
 

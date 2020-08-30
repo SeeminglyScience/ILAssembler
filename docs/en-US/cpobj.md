@@ -13,7 +13,7 @@ Copies the value type located at the address of an object (type "`&`", `*` or `n
 ## SYNTAX
 
 ```powershell
-cpobj
+cpobj <signature>
 ```
 
 ## DESCRIPTION
@@ -35,6 +35,24 @@ The following table lists the instruction's hexadecimal and Microsoft Intermedia
  The behavior of `cpobj` is unspecified if the source and destination object references are not pointers to instances of the class represented by the class token `classTok` (a `typeref` or `typedef`), or if `classTok` does not represent a value type.
 
  `System.NullReferenceException` may be thrown if an invalid address is detected.
+
+## PARAMETERS
+
+### -signature
+
+Specifies the target signature.
+
+```yaml
+Type: signature
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ## INPUTS
 

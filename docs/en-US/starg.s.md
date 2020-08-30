@@ -13,7 +13,7 @@ Stores the value on top of the evaluation stack in the argument slot at a specif
 ## SYNTAX
 
 ```powershell
-starg.s
+starg.s <byte>
 ```
 
 ## DESCRIPTION
@@ -35,6 +35,24 @@ The following table lists the instruction's hexadecimal and Microsoft Intermedia
  For procedures that take a variable argument list, the `starg.s` instruction can be used only for the initial fixed arguments, not those in the variable part of the signature.
 
  Performing a store into arguments that hold an integer value smaller than 4 bytes long truncates the value as it moves from the stack to the argument. Floating-point values are rounded from their native size (type `F`) to the size associated with the argument.
+
+## PARAMETERS
+
+### -index
+
+Specifies the index to load.
+
+```yaml
+Type: byte
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ## INPUTS
 

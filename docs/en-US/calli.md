@@ -13,7 +13,7 @@ Calls the method indicated on the evaluation stack (as a pointer to an entry poi
 ## SYNTAX
 
 ```powershell
-calli
+calli <signature>
 ```
 
 ## DESCRIPTION
@@ -43,6 +43,24 @@ The following table lists the instruction's hexadecimal and Microsoft Intermedia
  The arguments are placed on the stack in left-to-right order. That is, the first argument is computed and placed on the stack, then the second argument, then the third, until all necessary arguments are atop the stack in descending order. The argument-building code sequence for an instance or virtual method must push that instance reference (which must not be a null reference) before any of the user-visible arguments.
 
  `System.Security.SecurityException` may be thrown if the system security does not grant the caller access to the called method. The security check can occur when the Microsoft Intermediate Language (MSIL) instructions are converted to native code rather than at runtime.
+
+## PARAMETERS
+
+### -signature
+
+Specifies the target signature.
+
+```yaml
+Type: signature
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ## INPUTS
 

@@ -13,7 +13,7 @@ Pushes a typed reference to an instance of a specific type onto the evaluation s
 ## SYNTAX
 
 ```powershell
-mkrefany
+mkrefany <signature>
 ```
 
 ## DESCRIPTION
@@ -37,6 +37,24 @@ The following table lists the instruction's hexadecimal and Microsoft Intermedia
  The only valid operation permitted upon a typed reference is to pass it to a method that requires a typed reference as a parameter. The callee can then use the `refanytype` and `refanyval` instructions to retrieve the type (class) and the address respectively.
 
  `System.TypeLoadException` is thrown if `class` cannot be found. This is typically detected when Microsoft Intermediate Language (MSIL) instructions are converted to native code rather than at runtime.
+
+## PARAMETERS
+
+### -signature
+
+Specifies the target signature.
+
+```yaml
+Type: signature
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ## INPUTS
 

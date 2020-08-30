@@ -13,7 +13,7 @@ Load an argument address onto the evaluation stack.
 ## SYNTAX
 
 ```powershell
-ldarga
+ldarga <int32>
 ```
 
 ## DESCRIPTION
@@ -33,6 +33,24 @@ The following table lists the instruction's hexadecimal and Microsoft Intermedia
  For procedures that take a variable-length argument list, the `ldarga` instruction can be used only for the initial fixed arguments, not those in the variable part of the signature.
 
  `ldarga` is used for by-ref parameter passing. For other cases, `ldarg` and `starg` should be used.
+
+## PARAMETERS
+
+### -index
+
+Specifies the index to load.
+
+```yaml
+Type: int32
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ## INPUTS
 

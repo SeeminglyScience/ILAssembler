@@ -13,7 +13,7 @@ Converts a metadata token to its runtime representation, pushing it onto the eva
 ## SYNTAX
 
 ```powershell
-ldtoken
+ldtoken <signature>
 ```
 
 ## DESCRIPTION
@@ -33,6 +33,24 @@ The following table lists the instruction's hexadecimal and Microsoft Intermedia
  The value pushed on the stack can be used in calls to `Reflection` methods in the system class library.
 
  For information on runtime handles, see the following classes: `System.RuntimeFieldHandle`, `System.RuntimeTypeHandle`, and `System.RuntimeMethodHandle`.
+
+## PARAMETERS
+
+### -signature
+
+Specifies the target signature.
+
+```yaml
+Type: signature
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ## INPUTS
 

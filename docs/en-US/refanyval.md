@@ -13,7 +13,7 @@ Retrieves the address (type `&`) embedded in a typed reference.
 ## SYNTAX
 
 ```powershell
-refanyval
+refanyval <signature>
 ```
 
 ## DESCRIPTION
@@ -39,6 +39,24 @@ The following table lists the instruction's hexadecimal and Microsoft Intermedia
  `System.InvalidCastException` is thrown if `type` is not identical to the type stored in the type reference (in this case, `type` is the class supplied to the `mkrefany` instruction that constructed said typed reference).
 
  `System.TypeLoadException` is thrown if `type` cannot be found.
+
+## PARAMETERS
+
+### -signature
+
+Specifies the target signature.
+
+```yaml
+Type: signature
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ## INPUTS
 

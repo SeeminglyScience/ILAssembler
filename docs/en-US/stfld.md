@@ -13,7 +13,7 @@ Replaces the value stored in the field of an object reference or pointer with a 
 ## SYNTAX
 
 ```powershell
-stfld
+stfld <signature>
 ```
 
 ## DESCRIPTION
@@ -37,6 +37,24 @@ The following table lists the instruction's hexadecimal and Microsoft Intermedia
  `System.NullReferenceException` is thrown if the object reference or pointer is a null reference and the field isn't static.
 
  `System.MissingFieldException` is thrown if `field` is not found in the metadata. This is typically checked when the Microsoft Intermediate Language (MSIL) instruction is converted to native code, not at runtime.
+
+## PARAMETERS
+
+### -signature
+
+Specifies the target signature.
+
+```yaml
+Type: signature
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ## INPUTS
 

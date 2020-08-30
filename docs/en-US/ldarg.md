@@ -13,7 +13,7 @@ Loads an argument (referenced by a specified index value) onto the stack.
 ## SYNTAX
 
 ```powershell
-ldarg
+ldarg <int32>
 ```
 
 ## DESCRIPTION
@@ -33,6 +33,24 @@ The following table lists the instruction's hexadecimal and Microsoft Intermedia
  For procedures that take a variable-length argument list, the `ldarg` instruction can be used only for the initial fixed arguments, not those in the variable part of the signature (see the `arglist` instruction for more details).
 
  Arguments that hold an integer value smaller than 4 bytes long are expanded to type `int32` when they are loaded onto the stack. Floating-point values are expanded to their native size (type `F`).
+
+## PARAMETERS
+
+### -index
+
+Specifies the index to load.
+
+```yaml
+Type: int32
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ## INPUTS
 

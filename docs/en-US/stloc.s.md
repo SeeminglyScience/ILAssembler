@@ -13,7 +13,7 @@ Pops the current value from the top of the evaluation stack and stores it in a t
 ## SYNTAX
 
 ```powershell
-stloc.s
+stloc.s <byte>
 ```
 
 ## DESCRIPTION
@@ -33,6 +33,24 @@ The following table lists the instruction's hexadecimal and Microsoft Intermedia
  The `stloc.s` instruction provides an efficient encoding for local variables 0 through 255.
 
  Storing into locals that hold an integer value smaller than 4 bytes long truncates the value as it moves from the stack to the local variable. Floating-point values are rounded from their native size (type `F`) to the size associated with the argument.
+
+## PARAMETERS
+
+### -index
+
+Specifies the index to load.
+
+```yaml
+Type: byte
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ## INPUTS
 

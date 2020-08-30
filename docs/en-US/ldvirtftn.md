@@ -13,7 +13,7 @@ Pushes an unmanaged pointer (type `native int`) to the native code implementing 
 ## SYNTAX
 
 ```powershell
-ldvirtftn
+ldvirtftn <signature>
 ```
 
 ## DESCRIPTION
@@ -35,6 +35,24 @@ The following table lists the instruction's hexadecimal and Microsoft Intermedia
  The resulting unmanaged pointer pushed onto the stack by the `ldvirtftn` instruction can be called using the `calli` instruction if it references a managed method (or a stub that transitions from managed to unmanaged code).
 
  The unmanaged pointer points to native code using the CLR calling convention. This method pointer should not be passed to unmanaged native code as a callback routine.
+
+## PARAMETERS
+
+### -signature
+
+Specifies the target signature.
+
+```yaml
+Type: signature
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ## INPUTS
 

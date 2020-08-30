@@ -13,7 +13,7 @@ Pushes a new object reference to a string literal stored in the metadata.
 ## SYNTAX
 
 ```powershell
-ldstr
+ldstr <string>
 ```
 
 ## DESCRIPTION
@@ -31,6 +31,24 @@ The following table lists the instruction's hexadecimal and Microsoft Intermedia
  The `ldstr` instruction pushes an object reference (type `O`) to a new string object representing the specific string literal stored in the metadata. The `ldstr` instruction allocates the requisite amount of memory and performs any format conversion required to convert the string literal from the form used in the file to the string format required at runtime.
 
  The Common Language Infrastructure (CLI) guarantees that the result of two `ldstr` instructions referring to two metadata tokens that have the same sequence of characters return precisely the same string object (a process known as "string interning").
+
+## PARAMETERS
+
+### -value
+
+Specifies the constant to push onto the stack.
+
+```yaml
+Type: string
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ## INPUTS
 

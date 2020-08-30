@@ -13,7 +13,7 @@ Pushes a supplied value of type `float64` onto the evaluation stack as type `F` 
 ## SYNTAX
 
 ```powershell
-ldc.r8
+ldc.r8 <double>
 ```
 
 ## DESCRIPTION
@@ -29,6 +29,24 @@ The following table lists the instruction's hexadecimal and Microsoft Intermedia
 1.  The value `num` is pushed onto the stack.
 
  This encoding pushes a `float64` value onto the stack.
+
+## PARAMETERS
+
+### -value
+
+Specifies the constant to push onto the stack.
+
+```yaml
+Type: branch_name
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ## INPUTS
 

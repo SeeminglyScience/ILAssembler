@@ -13,7 +13,7 @@ Transfers control to a target instruction (short form) if the first value is gre
 ## SYNTAX
 
 ```powershell
-bgt.s
+bgt.s <branch_name>
 ```
 
 ## DESCRIPTION
@@ -35,6 +35,24 @@ The following table lists the instruction's hexadecimal and Microsoft Intermedia
  The `bgt.s` instruction transfers control to the specified target instruction if `value1` is greater than `value2`. The effect is identical to performing a `cgt` instruction followed by a `brtrue` branch to the specific target instruction. The target instruction is represented as a 1-byte signed offset from the beginning of the instruction following the current instruction.
 
  If the target instruction has one or more prefix codes, control can only be transferred to the first of these prefixes. Control transfers into and out of `try`, `catch`, `filter`, and `finally` blocks cannot be performed by this instruction.
+
+## PARAMETERS
+
+### -branch
+
+Specifies the label representing the target offset.
+
+```yaml
+Type: branch_name
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ## INPUTS
 

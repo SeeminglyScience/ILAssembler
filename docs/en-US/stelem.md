@@ -13,7 +13,7 @@ Replaces the array element at a given index with the value on the evaluation sta
 ## SYNTAX
 
 ```powershell
-stelem
+stelem <signature>
 ```
 
 ## DESCRIPTION
@@ -43,6 +43,24 @@ The following table lists the instruction's hexadecimal and Microsoft intermedia
  `System.IndexOutOfRangeException` is thrown if `index` is negative, or larger than the bound of `array`.
 
  `System.ArrayTypeMismatchException` is thrown if `array` does not hold elements of the required type.
+
+## PARAMETERS
+
+### -signature
+
+Specifies the target signature.
+
+```yaml
+Type: signature
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ## INPUTS
 

@@ -13,7 +13,7 @@ Tests whether an object reference (type `O`) is an instance of a particular clas
 ## SYNTAX
 
 ```powershell
-isinst
+isinst <signature>
 ```
 
 ## DESCRIPTION
@@ -35,6 +35,24 @@ The following table lists the instruction's hexadecimal and Microsoft Intermedia
  `class` is a metadata token indicating the desired class. If the class of the object on the top of the stack implements `class` (if `class` is an interface) or is a derived class of `class` (if `class` is a regular class) then it is cast to type `class` and the result is pushed on the stack, exactly as though `castclass` had been called. Otherwise, a null reference is pushed on the stack. If the object reference itself is a null reference, then `isinst` likewise returns a null reference.
 
  `System.TypeLoadException` is thrown if class cannot be found. This is typically detected when the Microsoft Intermediate Language (MSIL) instructions are converted to native code rather than at runtime.
+
+## PARAMETERS
+
+### -signature
+
+Specifies the target signature.
+
+```yaml
+Type: signature
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ## INPUTS
 

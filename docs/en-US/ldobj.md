@@ -13,7 +13,7 @@ Copies the value type object pointed to by an address to the top of the evaluati
 ## SYNTAX
 
 ```powershell
-ldobj
+ldobj <signature>
 ```
 
 ## DESCRIPTION
@@ -39,6 +39,24 @@ The following table lists the instruction's hexadecimal and Microsoft Intermedia
  The operation of the `ldobj` instruction can be altered by an immediately preceding `volatile.` or `unaligned.` prefix instruction.
 
  `System.TypeLoadException` is thrown if class cannot be found. This is typically detected when the Microsoft Intermediate Language (MSIL) instruction is converted to native code rather than at runtime.
+
+## PARAMETERS
+
+### -signature
+
+Specifies the target signature.
+
+```yaml
+Type: signature
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ## INPUTS
 

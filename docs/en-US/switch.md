@@ -13,7 +13,7 @@ Implements a jump table.
 ## SYNTAX
 
 ```powershell
-switch
+switch <branch_name[]>
 ```
 
 ## DESCRIPTION
@@ -37,6 +37,24 @@ The following table lists the instruction's hexadecimal and Microsoft Intermedia
  If the target instruction has one or more prefix codes, control can only be transferred to the first of these prefixes.
 
  Control transfers into and out of `try`, `catch`, `filter`, and `finally` blocks cannot be performed by this instruction. (Such transfers are severely restricted and must use the leave instruction instead).
+
+## PARAMETERS
+
+### -branchs
+
+Specifies a list of labels to transfer execution to should their index match the value popped off the stack.
+
+```yaml
+Type: branch_name[]
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ## INPUTS
 

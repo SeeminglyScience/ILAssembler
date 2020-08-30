@@ -13,7 +13,7 @@ Initializes each field of the value type at a specified address to a null refere
 ## SYNTAX
 
 ```powershell
-initobj
+initobj <signature>
 ```
 
 ## DESCRIPTION
@@ -33,6 +33,24 @@ The following table lists the instruction's hexadecimal and Microsoft Intermedia
  The `initobj` instruction initializes each field of the value type specified by the pushed address (of type `native int`, `&`, or `*`) to a null reference or a 0 of the appropriate primitive type. After this method is called, the instance is ready for a constructor method to be called. If `typeTok` is a reference type, this instruction has the same effect as `ldnull` followed by `stind.ref`.
 
  Unlike `newobj`, `initobj` does not call the constructor method. `initobj` is intended for initializing value types, while `newobj` is used to allocate and initialize objects.
+
+## PARAMETERS
+
+### -signature
+
+Specifies the target signature.
+
+```yaml
+Type: signature
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ## INPUTS
 

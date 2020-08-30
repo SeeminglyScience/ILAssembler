@@ -32,7 +32,7 @@ The following table lists the instruction's hexadecimal and Microsoft Intermedia
 
 3.  `value` is pushed back onto the stack if no exception is thrown.
 
- The `ckfinite instruction` throws `System.ArithmeticException` if `value` (a floating-point number) is either a "not a number" value (NaN) or a `+-` infinity value. `Ckfinite` leaves the value on the stack if no exception is thrown. Execution is unspecified if `value` is not a floating-point number.
+ The `ckfinite` instruction throws `System.ArithmeticException` if `value` (a floating-point number) is either a "not a number" value (NaN) or a `+-` infinity value. `Ckfinite` leaves the value on the stack if no exception is thrown. Execution is unspecified if `value` is not a floating-point number.
 
  `System.ArithmeticException` is thrown if `value` is not a 'normal' number.
 

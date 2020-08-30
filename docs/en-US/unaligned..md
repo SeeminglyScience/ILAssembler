@@ -4,7 +4,7 @@ online version: https://docs.microsoft.com/en-us/dotnet/api/system.reflection.em
 schema: 2.0.0
 ---
 
-# unaligned
+# unaligned.
 
 ## SYNOPSIS
 
@@ -13,7 +13,7 @@ Indicates that an address currently atop the evaluation stack might not be align
 ## SYNTAX
 
 ```powershell
-unaligned
+unaligned. <1 | 2 | 4>
 ```
 
 ## DESCRIPTION
@@ -35,6 +35,24 @@ The following table lists the instruction's hexadecimal and Microsoft Intermedia
  While the alignment for a `cpblk` instruction would logically require two numbers (one for the source and one for the destination), there is no noticeable impact on performance if only the lower number is specified.
 
  The `unaligned` and `volatile` prefixes can be combined in either order. They must immediately precede a `ldind`, `stind`, `ldfld`, `stfld`, `ldobj`, `stobj`, `initblk`, or `cpblk` instruction. Only the `volatile.` prefix is allowed for the `ldsfld` and `stsfld` instructions.
+
+## PARAMETERS
+
+### -alignment
+
+Specifies that generated code should assume that the following address is byte, double-byte, or quad-byte aligned.
+
+```yaml
+Type: 1 | 2 | 4
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ## INPUTS
 

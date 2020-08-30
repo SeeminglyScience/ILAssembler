@@ -13,7 +13,7 @@ Pushes the address of a static field onto the evaluation stack.
 ## SYNTAX
 
 ```powershell
-ldsflda
+ldsflda <signature>
 ```
 
 ## DESCRIPTION
@@ -33,6 +33,24 @@ The following table lists the instruction's hexadecimal and Microsoft Intermedia
  The `ldsflda` instruction can have a `volatile.` prefix.
 
  `System.MissingFieldException` is thrown if field is not found in the metadata. This is typically checked when Microsoft Intermediate Language (MSIL) instructions are converted to native code, not at runtime.
+
+## PARAMETERS
+
+### -signature
+
+Specifies the target signature.
+
+```yaml
+Type: signature
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ## INPUTS
 

@@ -13,7 +13,7 @@ Pushes the value of a static field onto the evaluation stack.
 ## SYNTAX
 
 ```powershell
-ldsfld
+ldsfld <signature>
 ```
 
 ## DESCRIPTION
@@ -31,6 +31,24 @@ The following table lists the instruction's hexadecimal and Microsoft Intermedia
  The `ldsfld` instruction pushes the value of a static (shared among all instances of a class) field on the stack. The return type is that associated with the passed metadata token `field`.
 
  The `ldsfld` instruction can have a `volatile.` prefix.
+
+## PARAMETERS
+
+### -signature
+
+Specifies the target signature.
+
+```yaml
+Type: signature
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ## INPUTS
 

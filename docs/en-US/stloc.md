@@ -13,7 +13,7 @@ Pops the current value from the top of the evaluation stack and stores it in a t
 ## SYNTAX
 
 ```powershell
-stloc
+stloc <int32>
 ```
 
 ## DESCRIPTION
@@ -33,6 +33,24 @@ The following table lists the instruction's hexadecimal and Microsoft Intermedia
  Storing into locals that hold an integer value smaller than 4 bytes long truncates the value as it moves from the stack to the local variable. Floating-point values are rounded from their native size (type `F`) to the size associated with the argument.
 
  Correct Microsoft Intermediate Language (MSIL) instructions require that `index` be a valid local index. For the `stloc` instruction, `index` must lie in the range 0 to 65534 inclusive (specifically, 65535 is not valid). The reason for excluding 65535 is pragmatic: likely implementations will use a 2-byte integer to track both a local's index, as well as the total number of locals for a given method. If an index of 65535 had been made valid, it would require a wider integer to track the number of locals in such a method.
+
+## PARAMETERS
+
+### -index
+
+Specifies the index to load.
+
+```yaml
+Type: int32
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ## INPUTS
 

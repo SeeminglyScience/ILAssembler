@@ -13,7 +13,7 @@ Pushes a supplied value of type `int32` onto the evaluation stack as an `int32`.
 ## SYNTAX
 
 ```powershell
-ldc.i4
+ldc.i4 <int32>
 ```
 
 ## DESCRIPTION
@@ -35,6 +35,24 @@ The following table lists the instruction's hexadecimal and Microsoft Intermedia
  2. Use the `ldc.i4` instruction followed by a `conv.i8` for constants that require 9 to 32 bits.
 
  3. Use a short form instruction followed by a `conv.i8` for constants that can be expressed in 8 or fewer bits.
+
+## PARAMETERS
+
+### -value
+
+Specifies the constant to push onto the stack.
+
+```yaml
+Type: int32
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ## INPUTS
 

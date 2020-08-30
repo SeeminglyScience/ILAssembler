@@ -13,7 +13,7 @@ Loads the element at a specified array index onto the top of the evaluation stac
 ## SYNTAX
 
 ```powershell
-ldelem
+ldelem <signature>
 ```
 
 ## DESCRIPTION
@@ -41,6 +41,24 @@ The following table lists the instruction's hexadecimal and Microsoft intermedia
  `System.NullReferenceException` is thrown if `array` is a null reference.
 
  `System.IndexOutOfRangeException` is thrown if `index` is negative, or larger than the upper bound of `array`.
+
+## PARAMETERS
+
+### -signature
+
+Specifies the target signature.
+
+```yaml
+Type: signature
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ## INPUTS
 

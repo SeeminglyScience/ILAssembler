@@ -13,7 +13,7 @@ Calls the method indicated by the passed method descriptor.
 ## SYNTAX
 
 ```powershell
-call
+call <signature>
 ```
 
 ## DESCRIPTION
@@ -46,6 +46,24 @@ The following table lists the instruction's hexadecimal and Microsoft Intermedia
 
 > [!NOTE]
 >  When calling methods of `System.Object` on value types, consider using the `constrained` prefix with the `callvirt` instruction instead of emitting a `call` instruction. This removes the need to emit different IL depending on whether or not the value type overrides the method, avoiding a potential versioning problem. Consider using the `constrained` prefix when invoking interface methods on value types, since the value type method implementing the interface method can be changed using a `MethodImpl`. These issues are described in more detail in the `constrained.` opcode.
+
+## PARAMETERS
+
+### -signature
+
+Specifies the target signature.
+
+```yaml
+Type: signature
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ## INPUTS
 

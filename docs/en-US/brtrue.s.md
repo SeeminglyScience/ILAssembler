@@ -13,7 +13,7 @@ Transfers control to a target instruction (short form) if `value` is `true`, not
 ## SYNTAX
 
 ```powershell
-brtrue.s
+brtrue.s <branch_name>
 ```
 
 ## DESCRIPTION
@@ -37,6 +37,24 @@ The following table lists the instruction's hexadecimal and Microsoft Intermedia
  The target instruction is represented as a 1-byte signed offset from the beginning of the instruction following the current instruction.
 
  If the target instruction has one or more prefix codes, control can only be transferred to the first of these prefixes. Control transfers into and out of `try`, `catch`, `filter`, and `finally` blocks cannot be performed by this instruction.
+
+## PARAMETERS
+
+### -branch
+
+Specifies the label representing the target offset.
+
+```yaml
+Type: branch_name
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ## INPUTS
 
