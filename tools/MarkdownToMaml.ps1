@@ -136,6 +136,41 @@ begin {
             $this.MoveToHeader('DESCRIPTION')
             $description = $this.ReadUntilNextHeader()
 
+            $parameters = @()
+            if ($this._blocks.MoveNext() -and $this.GetHeaderName($this._blocks.Current) -eq 'PARAMETERS') {
+                $parameterName = $this.MoveToNextHeader() -replace '^-*'
+                $type = [string]::Empty
+                $elements = while ($this._blocks.MoveNext()) {
+                    if ($this._blocks.Current -is [FencedCodeBlock]) {
+                        $typeLine = $this._blocks.Current.Lines.Lines[0].Slice.ToString()
+                        $type = $typeLine -replace '^Type: '
+                        break
+                    }
+
+                    $this.Convert($this._blocks.Current)
+                }
+
+                $parameters = [XElement]::new($this::cmd + 'parameter',
+                    [XAttribute]::new('required', 'true'),
+                    [XAttribute]::new('variableLength', 'false'),
+                    [XAttribute]::new('globbing', 'false'),
+                    [XAttribute]::new('pipelineInput', 'false'),
+                    [XAttribute]::new('position', '1'),
+                    [XAttribute]::new('aliases', 'none'),
+                    [XElement]::new($this::maml + 'name', $parameterName),
+                    [XElement]::new($this::maml + 'Description', $elements),
+                    [XElement]::new($this::cmd + 'parameterValue',
+                        [XAttribute]::new('required', 'true'),
+                        [XAttribute]::new('variableLength', 'false'),
+                        $type),
+                    [XElement]::new($this::dev + 'type',
+                        [XElement]::new($this::maml + 'name', $type),
+                        [XElement]::new($this::maml + 'uri', @())),
+                    [XElement]::new($this::dev + 'defaultValue', 'None'))
+
+
+            }
+
             return [XElement]::new($this::cmd + 'command',
                     [XElement]::new($this::cmd + 'details',
                         [XElement]::new($this::cmd + 'name', $this._name),
@@ -146,7 +181,7 @@ begin {
                     [XElement]::new($this::cmd + 'syntax',
                         [XElement]::new($this::cmd + 'syntaxItem',
                             [XElement]::new($this::maml + 'name', $syntax))),
-                    [XElement]::new($this::cmd + 'parameters', @()),
+                    [XElement]::new($this::cmd + 'parameters', $parameters),
                     [XElement]::new($this::cmd + 'inputTypes',
                         [XElement]::new($this::cmd + 'inputType',
                             [XElement]::new($this::dev + 'type',
@@ -189,6 +224,18 @@ begin {
             return $objs.ToArray()
         }
 
+        [string] MoveToNextHeader() {
+            while ($this._blocks.MoveNext()) {
+                if ($this._blocks.Current -isnot [HeadingBlock]) {
+                    continue
+                }
+
+                return $this.GetHeaderName($this._blocks.Current)
+            }
+
+            return [string]::Empty
+        }
+
         [void] MoveToHeader([string] $name) {
             while ($this._blocks.MoveNext()) {
                 if ($this._blocks.Current -isnot [HeadingBlock]) {
@@ -211,15 +258,11 @@ begin {
 
         [XElement] Convert([MarkdownObject] $obj) {
             if ($obj -is [Table]) {
-                $sb = [System.Text.StringBuilder]::new($obj.Span.Length)
-                $null = foreach ($row in $obj) {
-                    $sb.Append('|').
-                        Append($this.GetText($row)).
-                        Append('|').
-                        AppendLine()
-                }
-
-                return [XElement]::new($this::maml + 'para', $sb.ToString())
+                return [XElement]::new(
+                    $this::maml + 'para',
+                    $this._text.Substring(
+                        $obj.Span.Start - 1,
+                        $obj.Span.Length + 2))
             }
 
             return [XElement]::new($this::maml + 'para', $this.GetText($obj))
@@ -227,7 +270,13 @@ begin {
     }
 }
 end {
+    $file = $PSCmdlet.GetUnresolvedProviderPathFromPSPath($DestinationFile)
+    $directory = $file | Split-Path -Parent
+    if (-not (Test-Path $directory -PathType Container)) {
+        $null = New-Item -ItemType Directory $directory -ErrorAction Stop
+    }
+
     [MamlBuilder]::ParseAll(
         (Get-ChildItem $DocsPath\*.md).FullName,
-        $PSCmdlet.GetUnresolvedProviderPathFromPSPath($DestinationFile))
+        $file)
 }

@@ -49,6 +49,10 @@ task BuildManaged {
     & $dotnet publish --framework $CoreFramework --configuration $Configuration --verbosity q -nologo
 }
 
+task BuildMaml {
+    & $ToolsPath/MarkdownToMaml.ps1 -DocsPath $PSScriptRoot/docs/en-US -DestinationFile $ReleasePath/en-US/ILAssembler-help.xml
+}
+
 task CopyToRelease {
     "$ModuleName.psm1", "$ModuleName.psd1" | ForEach-Object {
         Join-Path $PowerShellPath -ChildPath $PSItem | Copy-Item -Destination $ReleasePath -Recurse @FailOnError
@@ -94,7 +98,7 @@ task DoPublish {
     Publish-Module -Name $ReleasePath -NuGetApiKey $apiKey -Confirm
 }
 
-task Build -Jobs Clean, AssertDependencies, BuildManaged, CopyToRelease
+task Build -Jobs Clean, AssertDependencies, BuildManaged, CopyToRelease, BuildMaml
 
 task Install -Jobs Build, DoInstall
 

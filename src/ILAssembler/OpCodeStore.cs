@@ -12,7 +12,7 @@ namespace ILAssembler
         {
             Add(new AutoLocalOpCodeInfo("ldloc.auto", isSet: false, isAddress: false));
             Add(new AutoLocalOpCodeInfo("stloc.auto", isSet: true, isAddress: false));
-            Add(new AutoLocalOpCodeInfo("ldloc.a.auto", isSet: false, isAddress: true));
+            Add(new AutoLocalOpCodeInfo("ldloca.auto", isSet: false, isAddress: true));
             Add(new NoOperandOpCodeInfo("add", ILOpCode.Add));
             Add(new NoOperandOpCodeInfo("nop", ILOpCode.Nop));
             Add(new NoOperandOpCodeInfo("break", ILOpCode.Break));
