@@ -24,7 +24,8 @@ namespace ILAssembler
                 return typeName.GetReflectionType() ?? throw ErrorTypeNotFound(typeName.Extent);
             }
 
-            if (genericTypeName.TypeName.FullName.Equals(SpecialTypes.ByRef, StringComparison.Ordinal))
+            if (genericTypeName.TypeName.FullName.Equals(SpecialTypes.ByRef, StringComparison.Ordinal)
+                || genericTypeName.TypeName.FullName.Equals(SpecialTypes.Ref, StringComparison.Ordinal))
             {
                 AssertSingleGenericArgument(genericTypeName);
                 var realType = Resolve(genericTypeName.GenericArguments[0]);
