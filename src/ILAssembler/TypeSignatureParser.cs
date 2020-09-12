@@ -69,7 +69,8 @@ namespace ILAssembler
         public override void VisitConvertExpression(ConvertExpressionAst convertExpressionAst)
         {
             ITypeName typeName = convertExpressionAst.Type.TypeName;
-            if (typeName.FullName.Equals(SpecialTypes.ByRef, StringComparison.Ordinal))
+            if (typeName.FullName.Equals(SpecialTypes.ByRef, StringComparison.Ordinal)
+                || typeName.FullName.Equals(SpecialTypes.Ref, StringComparison.Ordinal))
             {
                 if (!_allowByRef)
                 {
