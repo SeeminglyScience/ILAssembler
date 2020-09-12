@@ -237,6 +237,11 @@ namespace ILAssembler
                 return false;
             }
 
+            if (type.IsPointer)
+            {
+                return false;
+            }
+
             if (type == typeof(TypedReference))
             {
                 return false;
