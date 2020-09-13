@@ -180,3 +180,43 @@ $copyArray = il { [void]([int[]] $source, [int[]] $destination) } {
     ret
 }
 ```
+
+### Branch Labels
+
+Labels work the same as in ILAsm. They can prefix an instruction or be placed on their own line. When
+marking a label, it must be suffixed with a colon (<kbd>:</kbd>) character.
+
+```powershell
+            idc.4.0
+            brtrue.s was_true
+            br.s invalid
+was_true:   ldc.4.s 10
+            ret
+
+            invalid:
+            newobj { [void] [Exception].new() }
+            throw
+```
+
+#### Switch instruction
+
+Since the `switch` opcode doesn't actually fit the syntax of a PowerShell `switch` statement, the syntax
+cannot be used. Since it's a infrequently used opcode, you'll need to force it to be parsed as a command
+with an invocation operator.
+
+```powershell
+il { [void]([int] $input) } {
+    ldarg.0
+    switch was_0, was_1, was_2, was_3
+    ldstr 'input'
+    newobj { [void] [ArgumentOutOfRangeException].new([string]) }
+    throw
+
+    was_0:      ldstr 'input was 0'; br.s writeline
+    was_1:      ldstr 'input was 1'; br.s writeline
+    was_2:      ldstr 'input was 2'; br.s writeline
+    was_3:      ldstr 'input was 3'
+    write_line: call { [void] [Console]::WriteLine([string]) }
+                ret
+}
+```
