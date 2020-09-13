@@ -13,12 +13,12 @@ namespace ILAssembler.OpCodes
 
         protected abstract string ExpectedSignatureMessage { get; }
 
-        public override void Emit(CilAssemblyContext context, CommandAst ast)
+        public override void Emit(CilAssemblyContext context, in InstructionArguments arguments)
         {
-            ast.AssertArgumentCount(1);
-            if (!(ast.CommandElements[1] is ScriptBlockExpressionAst signatureBody))
+            arguments.AssertArgumentCount(1);
+            if (arguments[0] is not ScriptBlockExpressionAst signatureBody)
             {
-                throw ErrorExpectedSignature(ast.CommandElements[1]);
+                throw ErrorExpectedSignature(arguments[0]);
             }
 
             int token = GetToken(context, signatureBody);
@@ -43,7 +43,7 @@ namespace ILAssembler.OpCodes
             CilAssemblyContext context,
             ScriptBlockExpressionAst signatureBody);
 
-        protected int FallBackGetToken(
+        protected static int FallBackGetToken(
             TokenOpCodeInfo fallBackTo,
             CilAssemblyContext context,
             ScriptBlockExpressionAst signatureBody)

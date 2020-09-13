@@ -1,4 +1,3 @@
-using System.Management.Automation.Language;
 using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
 
@@ -12,10 +11,10 @@ namespace ILAssembler.OpCodes
         {
         }
 
-        public override void Emit(CilAssemblyContext context, CommandAst ast)
+        public override void Emit(CilAssemblyContext context, in InstructionArguments arguments)
         {
-            ast.AssertArgumentCount(1);
-            T argument = ast.CommandElements[1].ReadNumber<T>();
+            arguments.AssertArgumentCount(1);
+            T argument = arguments[0].ReadNumber<T>();
             context.Encoder.OpCode(OpCode);
             EmitArgument(ref context.Encoder, argument);
         }

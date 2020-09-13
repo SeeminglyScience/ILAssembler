@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.Management.Automation;
 using System.Management.Automation.Language;
-using System.Runtime.ExceptionServices;
 
 namespace ILAssembler
 {
@@ -38,6 +36,23 @@ namespace ILAssembler
             {
                 throw Error.Parse(element, "InvalidArgumentValue", e.Message);
             }
+        }
+
+        public static InstructionArguments GetInstructionArguments(this CommandAst command)
+        {
+            CommandElementAst nameAst = command.CommandElements[0];
+            if (nameAst is StringConstantExpressionAst stringConstant && !string.IsNullOrEmpty(stringConstant.Value))
+            {
+                string commandName = stringConstant.Value;
+                return new InstructionArguments(
+                    command.CommandElements.Slice(1),
+                    nameAst.Extent.EndScriptPosition,
+                    commandName);
+            }
+
+            Throw.CannotReadCommandName(nameAst.Extent);
+            // Unreachable.
+            return default;
         }
 
         public static void AssertArgumentCount(this CommandAst command, int expectedCount)

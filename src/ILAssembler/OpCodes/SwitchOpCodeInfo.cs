@@ -10,22 +10,22 @@ namespace ILAssembler.OpCodes
         {
         }
 
-        public override void Emit(CilAssemblyContext context, CommandAst ast)
+        public override void Emit(CilAssemblyContext context, in InstructionArguments arguments)
         {
-            ast.AssertArgumentCount(1);
+            arguments.AssertArgumentCount(1);
             ReadOnlyListSegment<ExpressionAst> branches;
-            if (ast.CommandElements[1] is ArrayLiteralAst arrayLiteralAst)
+            if (arguments[0] is ArrayLiteralAst arrayLiteralAst)
             {
                 branches = arrayLiteralAst.Elements;
             }
-            else if (ast.CommandElements[1] is StringConstantExpressionAst stringConstant)
+            else if (arguments[0] is StringConstantExpressionAst stringConstant)
             {
                 branches = new ExpressionAst[] { stringConstant };
             }
             else
             {
                 throw Error.Parse(
-                    ast,
+                    arguments.StartPosition.ToScriptExtent(),
                     nameof(Strings.MissingBranches),
                     Strings.MissingBranches);
             }
@@ -33,7 +33,7 @@ namespace ILAssembler.OpCodes
             var labels = new LabelHandle[branches.Count];
             for (int i = 0; i < labels.Length; i++)
             {
-                if (!(branches[i] is StringConstantExpressionAst branchName))
+                if (branches[i] is not StringConstantExpressionAst branchName)
                 {
                     throw Error.Parse(
                         branches[i],

@@ -10,9 +10,9 @@ namespace ILAssembler.OpCodes
         {
         }
 
-        public override void Emit(CilAssemblyContext context, CommandAst ast)
+        public override void Emit(CilAssemblyContext context, in InstructionArguments arguments)
         {
-            ast.AssertArgumentCount(0);
+            arguments.AssertArgumentCount(0);
             context.Encoder.OpCode(OpCode);
         }
     }

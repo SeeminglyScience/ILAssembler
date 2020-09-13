@@ -144,9 +144,10 @@ namespace ILAssembler
 
         public override void VisitCommand(CommandAst commandAst)
         {
+            InstructionArguments arguments = commandAst.GetInstructionArguments();
             if (!_preambleFinished)
             {
-                if (TryReadPreamble(commandAst))
+                if (TryReadPreamble(commandAst, in arguments))
                 {
                     return;
                 }
@@ -154,29 +155,36 @@ namespace ILAssembler
                 _preambleFinished = true;
             }
 
-            string name = ReadCommandName(commandAst);
-            if (name[0] == ':')
+            string name = arguments.CommandName;
+            int nameOffset = 0;
+            if (name[^1] == ':')
             {
-                var label = _context.GetOrAddLabel(name.Substring(1));
+                LabelHandle label = _context.GetOrAddLabel(name[0..^1]);
                 _context.BranchBuilder.MarkLabel(label);
-                return;
+                if (arguments.Count is 0)
+                {
+                    return;
+                }
+
+                arguments = arguments.Shift();
+                name = arguments.CommandName;
+                nameOffset = 1;
             }
 
             if (!OpCodeStore.TryGetOpCodeInfo(name, out OpCodeInfo? info))
             {
                 throw Error.Parse(
-                    commandAst.CommandElements[0],
+                    commandAst.CommandElements[nameOffset],
                     nameof(Strings.UnrecognizedOpCode),
                     Strings.UnrecognizedOpCode);
             }
 
-            info!.Emit(_context, commandAst);
+            info!.Emit(_context, in arguments);
         }
 
-        private bool TryReadPreamble(CommandAst commandAst)
+        private bool TryReadPreamble(CommandAst commandAst, in InstructionArguments arguments)
         {
-            var name = ReadCommandName(commandAst);
-            if (name.Equals(".maxstack", StringComparison.OrdinalIgnoreCase))
+            if (arguments.CommandName.Equals(".maxstack", StringComparison.OrdinalIgnoreCase))
             {
                 if (_maxStack is not null)
                 {
@@ -186,12 +194,12 @@ namespace ILAssembler
                         Strings.MaxStackAlreadySpecified);
                 }
 
-                commandAst.AssertArgumentCount(1);
-                _maxStack = commandAst.CommandElements[1].ReadNumber<int>();
+                arguments.AssertArgumentCount(1);
+                _maxStack = arguments[0].ReadNumber<int>();
                 return true;
             }
 
-            if (name.Equals(".locals", StringComparison.OrdinalIgnoreCase))
+            if (arguments.CommandName.Equals(".locals", StringComparison.OrdinalIgnoreCase))
             {
                 if (_context.Locals is not null)
                 {
@@ -201,48 +209,44 @@ namespace ILAssembler
                         Strings.LocalsAlreadySpecified);
                 }
 
-                ReadLocals(commandAst);
+                ReadLocals(arguments);
                 return true;
             }
 
             return false;
         }
 
-        private unsafe void ReadLocals(CommandAst commandAst)
+        private unsafe void ReadLocals(InstructionArguments arguments)
         {
             _context.ILInfo.DynamicMethod.InitLocals = false;
-            Ast? body = null;
-            if (commandAst.CommandElements.Count == 3)
+            if (arguments.Count == 2)
             {
-                if (!(commandAst.CommandElements[1] is StringConstantExpressionAst stringConstant)
+                if (arguments[0] is not StringConstantExpressionAst stringConstant
                     || stringConstant.StringConstantType != StringConstantType.BareWord
                     || !stringConstant.Value.Equals("init", StringComparison.Ordinal))
                 {
                     throw Error.Parse(
-                        commandAst.CommandElements[1],
+                        arguments[0],
                         nameof(Strings.UnexpectedLocalsKeyword),
                         Strings.UnexpectedLocalsKeyword);
                 }
 
                 _context.ILInfo.DynamicMethod.InitLocals = true;
-                body = commandAst.CommandElements[2];
+                arguments = arguments.Slice(1);
             }
-            else if (commandAst.CommandElements.Count == 2)
-            {
-                body = commandAst.CommandElements[1];
-            }
-            else if (commandAst.CommandElements.Count == 1)
+
+            if (arguments.Count is 0)
             {
                 throw Error.Parse(
-                    commandAst.Extent.EndScriptPosition.ToScriptExtent(),
+                    arguments.StartPosition.ToScriptExtent(),
                     nameof(Strings.MissingLocalsBody),
                     Strings.MissingLocalsBody);
             }
-            else
+            else if (arguments.Count > 1)
             {
                 var extentToThrow = ExtentOps.ExtentOf(
-                    commandAst.CommandElements[3].Extent,
-                    commandAst.CommandElements[^1].Extent);
+                    arguments[1].Extent,
+                    arguments[^1].Extent);
 
                 throw Error.Parse(
                     extentToThrow,
@@ -250,9 +254,9 @@ namespace ILAssembler
                     Strings.UnexpectedLocalsArgument);
             }
 
-            if (!(body is ScriptBlockExpressionAst sbExpression))
+            if (arguments[0] is not ScriptBlockExpressionAst sbExpression)
             {
-                throw Error.UnexpectedType(body, nameof(ScriptBlock));
+                throw Error.UnexpectedType(arguments[0], nameof(ScriptBlock));
             }
 
             TypedIdentifier[] locals = LocalSignatureParser.ParseLocals(sbExpression.ScriptBlock);
@@ -287,20 +291,6 @@ namespace ILAssembler
             }
 
             _context.ILInfo.SetLocalSignature(rawSignature, blobEncoder.Builder.Count);
-        }
-
-        private static string ReadCommandName(CommandAst commandAst)
-        {
-            string name = commandAst.GetCommandName();
-            if (!string.IsNullOrEmpty(name))
-            {
-                return name;
-            }
-
-            throw Error.Parse(
-                commandAst,
-                nameof(Strings.CannotReadCommandName),
-                Strings.CannotReadCommandName);
         }
     }
 }

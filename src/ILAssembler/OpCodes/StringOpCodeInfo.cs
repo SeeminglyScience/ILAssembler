@@ -9,12 +9,12 @@ namespace ILAssembler.OpCodes
         {
         }
 
-        public override void Emit(CilAssemblyContext context, CommandAst ast)
+        public override void Emit(CilAssemblyContext context, in InstructionArguments arguments)
         {
-            ast.AssertArgumentCount(1);
-            if (!(ast.CommandElements[1] is StringConstantExpressionAst stringConstant))
+            arguments.AssertArgumentCount(1);
+            if (arguments[0] is not StringConstantExpressionAst stringConstant)
             {
-                throw Error.UnexpectedType(ast.CommandElements[1], "string");
+                throw Error.UnexpectedType(arguments[0], "string");
             }
 
             var token = context.ILInfo.GetTokenFor(stringConstant.Value);

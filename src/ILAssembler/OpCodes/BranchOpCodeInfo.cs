@@ -9,10 +9,10 @@ namespace ILAssembler.OpCodes
         {
         }
 
-        public override void Emit(CilAssemblyContext context, CommandAst ast)
+        public override void Emit(CilAssemblyContext context, in InstructionArguments arguments)
         {
-            ast.AssertArgumentCount(1);
-            if (ast.CommandElements[1] is StringConstantExpressionAst stringConstant)
+            arguments.AssertArgumentCount(1);
+            if (arguments[0] is StringConstantExpressionAst stringConstant)
             {
                 context.BranchBuilder.Branch(
                     OpCode,
@@ -24,12 +24,12 @@ namespace ILAssembler.OpCodes
             context.Encoder.OpCode(OpCode);
             if (OpCode.GetBranchOperandSize() == 1)
             {
-                sbyte shortArg = ast.CommandElements[1].ReadNumber<sbyte>();
+                sbyte shortArg = arguments[0].ReadNumber<sbyte>();
                 context.Encoder.CodeBuilder.WriteSByte(shortArg);
                 return;
             }
 
-            int longArg = ast.CommandElements[1].ReadNumber<int>();
+            int longArg = arguments[0].ReadNumber<int>();
             context.Encoder.CodeBuilder.WriteCompressedSignedInteger(longArg);
         }
     }
