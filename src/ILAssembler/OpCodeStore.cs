@@ -230,7 +230,7 @@ namespace ILAssembler
             Add(new TypeOpCodeInfo("sizeof", ILOpCode.Sizeof));
             Add(new NoOperandOpCodeInfo("refanytype", ILOpCode.Refanytype));
             Add(new NoOperandOpCodeInfo("readonly.", ILOpCode.Readonly));
-            Add(new SwitchOpCodeInfo(".switch", ILOpCode.Switch));
+            Add(new SwitchOpCodeInfo("switch", ILOpCode.Switch));
         }
 
         public static bool TryGetOpCodeInfo(string name, out OpCodeInfo? info)

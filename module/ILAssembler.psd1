@@ -68,7 +68,7 @@ FunctionsToExport =
     'endfinally', 'leave', 'leave.s', 'stind.i', 'conv.u', 'arglist', 'ceq', 'cgt', 'cgt.un',
     'clt', 'clt.un', 'ldftn', 'ldvirtftn', 'ldarg', 'ldarga', 'starg', 'ldloc', 'ldloca',
     'stloc', 'localloc', 'endfilter', 'unaligned.', 'volatile.', 'tail.', 'initobj', 'constrained.',
-    'cpblk', 'initblk', 'rethrow', 'sizeof', 'refanytype', 'readonly.'
+    'cpblk', 'initblk', 'rethrow', 'sizeof', 'refanytype', 'readonly.', 'switch'
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = 'New-ILDelegate'
