@@ -20,12 +20,12 @@ namespace ILAssembler.OpCodes
 
         public override ILOpCode OpCode => default;
 
-        public override void Emit(CilAssemblyContext context, CommandAst ast)
+        public override void Emit(CilAssemblyContext context, in InstructionArguments arguments)
         {
-            ast.AssertArgumentCount(1);
-            if (!(ast.CommandElements[1] is VariableExpressionAst variable))
+            arguments.AssertArgumentCount(1);
+            if (arguments[0] is not VariableExpressionAst variable)
             {
-                throw Error.UnexpectedType(ast.CommandElements[1], "variable");
+                throw Error.UnexpectedType(arguments[0], "variable");
             }
 
             var index = GetIndex(context, variable);

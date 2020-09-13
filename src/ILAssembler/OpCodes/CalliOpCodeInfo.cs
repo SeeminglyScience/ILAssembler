@@ -11,19 +11,19 @@ namespace ILAssembler.OpCodes
         {
         }
 
-        public override void Emit(CilAssemblyContext context, CommandAst ast)
+        public override void Emit(CilAssemblyContext context, in InstructionArguments arguments)
         {
-            if (ast.CommandElements.Count < 2)
+            if (arguments.Count < 1)
             {
-                throw Error.IncompleteCalli(ast.CommandElements[0].Extent.EndScriptPosition.ToScriptExtent());
+                throw Error.IncompleteCalli(arguments.StartPosition.ToScriptExtent());
             }
 
             SignatureCallingConvention? callingConvention = null;
             MethodIdentifier? signature = null;
 
-            for (int i = 1; i < ast.CommandElements.Count; i++)
+            for (int i = 0; i < arguments.Count; i++)
             {
-                if (ast.CommandElements[i] is StringConstantExpressionAst stringConstant)
+                if (arguments[i] is StringConstantExpressionAst stringConstant)
                 {
                     if (callingConvention is not null)
                     {
@@ -48,7 +48,7 @@ namespace ILAssembler.OpCodes
                     if (stringConstant.Value.Equals("unmanaged", StringComparison.Ordinal))
                     {
                         i++;
-                        if (i >= ast.CommandElements.Count || !(ast.CommandElements[i] is StringConstantExpressionAst nextString))
+                        if (i >= arguments.Count || !(arguments[i] is StringConstantExpressionAst nextString))
                         {
                             throw Error.IncompleteCalli(
                                 stringConstant.Extent.EndScriptPosition.ToScriptExtent());
@@ -90,14 +90,14 @@ namespace ILAssembler.OpCodes
                         Strings.UnknownCallingConvention);
                 }
 
-                if (ast.CommandElements[i] is ScriptBlockExpressionAst scriptBlockExpression)
+                if (arguments[i] is ScriptBlockExpressionAst scriptBlockExpression)
                 {
-                    if (i != ast.CommandElements.Count - 1)
+                    if (i != arguments.Count - 1)
                     {
                         throw Error.Parse(
                             ExtentOps.ExtentOf(
-                                ast.CommandElements[i + 1].Extent,
-                                ast.CommandElements[^1].Extent),
+                                arguments[i + 1].Extent,
+                                arguments[^1].Extent),
                             nameof(Strings.InvalidCalliArgument),
                             Strings.InvalidCalliArgument);
                     }
@@ -117,7 +117,7 @@ namespace ILAssembler.OpCodes
             if (signature is null)
             {
                 throw Error.IncompleteCalli(
-                    ast.CommandElements[^1].Extent.EndScriptPosition.ToScriptExtent());
+                    arguments[^1].Extent.EndScriptPosition.ToScriptExtent());
             }
 
             var blobEncoder = new BlobEncoder(new BlobBuilder());
