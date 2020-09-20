@@ -8,22 +8,22 @@ namespace ILAssembler
         {
             if (scriptBlockAst.ParamBlock is not null)
             {
-                throw Error.ElementNotSupported(scriptBlockAst.ParamBlock, "param");
+                Throw.ElementNotSupported(scriptBlockAst.ParamBlock, "param");
             }
 
             if (scriptBlockAst.DynamicParamBlock is not null)
             {
-                throw Error.ElementNotSupported(scriptBlockAst.DynamicParamBlock, "dynamicparam");
+                Throw.ElementNotSupported(scriptBlockAst.DynamicParamBlock, "dynamicparam");
             }
 
             if (scriptBlockAst.BeginBlock is not null)
             {
-                throw Error.ElementNotSupported(scriptBlockAst.BeginBlock, "begin");
+                Throw.ElementNotSupported(scriptBlockAst.BeginBlock, "begin");
             }
 
             if (scriptBlockAst.ProcessBlock is not null)
             {
-                throw Error.ElementNotSupported(scriptBlockAst.ProcessBlock, "process");
+                Throw.ElementNotSupported(scriptBlockAst.ProcessBlock, "process");
             }
 
             scriptBlockAst.EndBlock.Visit(this);
@@ -35,8 +35,8 @@ namespace ILAssembler
             {
                 Throw.ParseException(
                     namedBlockAst.Extent,
-                    nameof(Strings.MissingSignatureBody),
-                    Strings.MissingSignatureBody);
+                    nameof(SR.MissingSignatureBody),
+                    SR.MissingSignatureBody);
                 return;
             }
 
@@ -44,8 +44,8 @@ namespace ILAssembler
             {
                 Throw.ParseException(
                     namedBlockAst.Statements[1].Extent,
-                    nameof(Strings.InvalidStatementCount),
-                    Strings.InvalidStatementCount);
+                    nameof(SR.InvalidStatementCount),
+                    SR.InvalidStatementCount);
                 return;
             }
 
@@ -56,11 +56,11 @@ namespace ILAssembler
         {
             if (pipelineAst.PipelineElements.Count > 1)
             {
-                var extentToThrow = ExtentOps.ExtentOf(
+                IScriptExtent extentToThrow = ExtentOps.ExtentOf(
                     pipelineAst.PipelineElements[1].Extent,
                     pipelineAst.PipelineElements[^1].Extent);
 
-                throw Error.ElementNotSupported(extentToThrow, "|");
+                Throw.ElementNotSupported(extentToThrow, "|");
             }
 
             pipelineAst.PipelineElements[0].Visit(this);

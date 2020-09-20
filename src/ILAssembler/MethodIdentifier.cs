@@ -63,10 +63,10 @@ namespace ILAssembler
             var method = GetMethod(subject);
             if (method.DeclaringType is null)
             {
-                throw Error.Parse(
+                throw ILParseException.Create(
                     subject,
-                    nameof(Strings.MissingDeclaringType),
-                    Strings.MissingDeclaringType);
+                    nameof(SR.MissingDeclaringType),
+                    SR.MissingDeclaringType);
             }
 
             if (method.DeclaringType.IsGenericType)
@@ -81,10 +81,10 @@ namespace ILAssembler
         {
             if (DeclaringType?.Type is null)
             {
-                throw Error.Parse(
+                throw ILParseException.Create(
                     subject,
-                    nameof(Strings.MissingDeclaringType),
-                    Strings.MissingDeclaringType);
+                    nameof(SR.MissingDeclaringType),
+                    SR.MissingDeclaringType);
             }
 
             if (GenericArgs.Length == 0)
@@ -136,7 +136,7 @@ namespace ILAssembler
                 }
                 catch (Exception e)
                 {
-                    throw Error.Parse(
+                    throw ILParseException.Create(
                         subject,
                         "InvalidGenericArgs",
                         ExceptionDispatchInfo.Capture(e));

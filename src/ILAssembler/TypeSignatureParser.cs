@@ -31,18 +31,18 @@ namespace ILAssembler
         {
             if (_type is null)
             {
-                throw Error.Parse(
+                Throw.ParseException(
                     subject,
-                    nameof(Strings.MissingTypeSpecification),
-                    Strings.MissingTypeSpecification);
+                    nameof(SR.MissingTypeSpecification),
+                    SR.MissingTypeSpecification);
             }
 
             if (_name is null && _nameKind == NameExpectation.Require)
             {
-                throw Error.Parse(
+                Throw.ParseException(
                     subject,
-                    nameof(Strings.MissingSignatureIdentifier),
-                    Strings.MissingSignatureIdentifier);
+                    nameof(SR.MissingSignatureIdentifier),
+                    SR.MissingSignatureIdentifier);
             }
 
             var result = (_type, _name, _isPinned, _isByRef);
@@ -57,10 +57,10 @@ namespace ILAssembler
         {
             if (_nameKind == NameExpectation.Reject)
             {
-                throw Error.Parse(
-                    variableExpressionAst,
-                    nameof(Strings.ExpectedTypeExpression),
-                    Strings.ExpectedTypeExpression);
+                Throw.ParseException(
+                    variableExpressionAst.Extent,
+                    nameof(SR.ExpectedTypeExpression),
+                    SR.ExpectedTypeExpression);
             }
 
             _name = variableExpressionAst.VariablePath.UserPath;
@@ -74,10 +74,10 @@ namespace ILAssembler
             {
                 if (!_allowByRef)
                 {
-                    throw Error.Parse(
+                    throw ILParseException.Create(
                         typeName.Extent,
-                        nameof(Strings.ByRefNotSupported),
-                        Strings.ByRefNotSupported);
+                        nameof(SR.ByRefNotSupported),
+                        SR.ByRefNotSupported);
                 }
 
                 if (_isByRef)
@@ -94,10 +94,10 @@ namespace ILAssembler
             {
                 if (!_allowPinned)
                 {
-                    throw Error.Parse(
+                    throw ILParseException.Create(
                         typeName.Extent,
-                        nameof(Strings.PinnedNotSupported),
-                        Strings.PinnedNotSupported);
+                        nameof(SR.PinnedNotSupported),
+                        SR.PinnedNotSupported);
                 }
 
                 if (_isPinned)
@@ -112,10 +112,10 @@ namespace ILAssembler
 
             if (_type is not null)
             {
-                throw Error.Parse(
-                    convertExpressionAst,
-                    nameof(Strings.TypeAlreadySpecified),
-                    Strings.TypeAlreadySpecified);
+                throw ILParseException.Create(
+                    convertExpressionAst.Extent,
+                    nameof(SR.TypeAlreadySpecified),
+                    SR.TypeAlreadySpecified);
             }
 
             _type = TypeResolver.Resolve(typeName);
@@ -127,18 +127,18 @@ namespace ILAssembler
         {
             if (_nameKind == NameExpectation.Require)
             {
-                throw Error.Parse(
-                    typeExpressionAst,
-                    nameof(Strings.ExpectedVariableExpression),
-                    Strings.ExpectedVariableExpression);
+                throw ILParseException.Create(
+                    typeExpressionAst.Extent,
+                    nameof(SR.ExpectedVariableExpression),
+                    SR.ExpectedVariableExpression);
             }
 
             if (_type is not null)
             {
-                throw Error.Parse(
-                    typeExpressionAst,
-                    nameof(Strings.TypeAlreadySpecified),
-                    Strings.TypeAlreadySpecified);
+                throw ILParseException.Create(
+                    typeExpressionAst.Extent,
+                    nameof(SR.TypeAlreadySpecified),
+                    SR.TypeAlreadySpecified);
             }
 
             _type = TypeResolver.Resolve(typeExpressionAst.TypeName);
@@ -146,11 +146,10 @@ namespace ILAssembler
 
         private static ParseException ErrorDuplicateModifier(IScriptExtent extent, string modifierName)
         {
-            return Error.Parse(
+            return ILParseException.Create(
                 extent,
-                nameof(Strings.LocalsModAlreadySpecified),
-                Strings.LocalsModAlreadySpecified,
-                modifierName);
+                nameof(SR.LocalsModAlreadySpecified),
+                SR.Format(SR.LocalsModAlreadySpecified, modifierName));
         }
     }
 }

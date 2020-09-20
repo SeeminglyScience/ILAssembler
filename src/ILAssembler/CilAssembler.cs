@@ -4,6 +4,7 @@ using System.Management.Automation.Language;
 using System.Reflection.Emit;
 using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
+using System.Runtime.CompilerServices;
 using ILAssembler.OpCodes;
 
 namespace ILAssembler
@@ -72,10 +73,10 @@ namespace ILAssembler
 
         public override void VisitTryStatement(TryStatementAst tryStatementAst)
         {
-            Throw.ParseException(
+            throw ILParseException.Create(
                 tryStatementAst.Extent,
-                nameof(Strings.TryStatementNotSupported),
-                Strings.TryStatementNotSupported);
+                nameof(SR.TryStatementNotSupported),
+                SR.TryStatementNotSupported);
         }
 
         public override void VisitBreakStatement(BreakStatementAst breakStatementAst)
@@ -120,10 +121,10 @@ namespace ILAssembler
 
             if (!OpCodeStore.TryGetOpCodeInfo(name, out OpCodeInfo? info))
             {
-                throw Error.Parse(
-                    commandAst.CommandElements[nameOffset],
-                    nameof(Strings.UnrecognizedOpCode),
-                    Strings.UnrecognizedOpCode);
+                Throw.ParseException(
+                    commandAst.CommandElements[nameOffset].Extent,
+                    nameof(SR.UnrecognizedOpCode),
+                    SR.UnrecognizedOpCode);
             }
 
             info!.Emit(_context, in arguments);
@@ -131,36 +132,48 @@ namespace ILAssembler
 
         private bool TryReadPreamble(CommandAst commandAst, in InstructionArguments arguments)
         {
-            if (arguments.CommandName.Equals(".maxstack", StringComparison.OrdinalIgnoreCase))
+            if (arguments.CommandName is ".maxstack")
             {
-                if (_maxStack is not null)
-                {
-                    throw Error.Parse(
-                        commandAst,
-                        nameof(Strings.MaxStackAlreadySpecified),
-                        Strings.MaxStackAlreadySpecified);
-                }
-
-                arguments.AssertArgumentCount(1);
-                _maxStack = arguments[0].ReadNumber<int>();
+                ReadMaxStack(commandAst, in arguments);
                 return true;
             }
 
-            if (arguments.CommandName.Equals(".locals", StringComparison.OrdinalIgnoreCase))
+            if (arguments.CommandName is ".locals")
             {
-                if (_context.Locals is not null)
-                {
-                    throw Error.Parse(
-                        commandAst.CommandElements[0],
-                        nameof(Strings.LocalsAlreadySpecified),
-                        Strings.LocalsAlreadySpecified);
-                }
-
-                ReadLocals(arguments);
+                ReadLocalsBlock(commandAst, in arguments);
                 return true;
             }
 
             return false;
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            void ReadMaxStack(CommandAst commandAst, in InstructionArguments arguments)
+            {
+                if (_maxStack is not null)
+                {
+                    throw ILParseException.Create(
+                        commandAst.Extent,
+                        nameof(SR.MaxStackAlreadySpecified),
+                        SR.MaxStackAlreadySpecified);
+                }
+
+                arguments.AssertArgumentCount(1);
+                _maxStack = arguments[0].ReadNumber<int>();
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            void ReadLocalsBlock(CommandAst commandAst, in InstructionArguments arguments)
+            {
+                if (_context.Locals is not null)
+                {
+                    throw ILParseException.Create(
+                        commandAst.CommandElements[0].Extent,
+                        nameof(SR.LocalsAlreadySpecified),
+                        SR.LocalsAlreadySpecified);
+                }
+
+                ReadLocals(arguments);
+            }
         }
 
         private unsafe void ReadLocals(InstructionArguments arguments)
@@ -172,10 +185,10 @@ namespace ILAssembler
                     StringConstantExpressionAst
                     and { StringConstantType: StringConstantType.BareWord, Value: "init" }))
                 {
-                    throw Error.Parse(
-                        arguments[0],
-                        nameof(Strings.UnexpectedLocalsKeyword),
-                        Strings.UnexpectedLocalsKeyword);
+                    throw ILParseException.Create(
+                        arguments[0].Extent,
+                        nameof(SR.UnexpectedLocalsKeyword),
+                        SR.UnexpectedLocalsKeyword);
                 }
 
                 _context.ILInfo.DynamicMethod.InitLocals = true;
@@ -184,10 +197,10 @@ namespace ILAssembler
 
             if (arguments.Count is 0)
             {
-                throw Error.Parse(
+                throw ILParseException.Create(
                     arguments.StartPosition.ToScriptExtent(),
-                    nameof(Strings.MissingLocalsBody),
-                    Strings.MissingLocalsBody);
+                    nameof(SR.MissingLocalsBody),
+                    SR.MissingLocalsBody);
             }
             else if (arguments.Count > 1)
             {
@@ -195,15 +208,16 @@ namespace ILAssembler
                     arguments[1].Extent,
                     arguments[^1].Extent);
 
-                throw Error.Parse(
+                throw ILParseException.Create(
                     extentToThrow,
-                    nameof(Strings.UnexpectedLocalsArgument),
-                    Strings.UnexpectedLocalsArgument);
+                    nameof(SR.UnexpectedLocalsArgument),
+                    SR.UnexpectedLocalsArgument);
             }
 
             if (arguments[0] is not ScriptBlockExpressionAst sbExpression)
             {
-                throw Error.UnexpectedType(arguments[0], nameof(ScriptBlock));
+                Throw.UnexpectedType(arguments[0], nameof(ScriptBlock));
+                return;
             }
 
             TypedIdentifier[] locals = LocalSignatureParser.ParseLocals(sbExpression.ScriptBlock);

@@ -54,11 +54,10 @@ namespace ILAssembler
             TypedIdentifier identifier = _signatureParser.GetSignatureAndReset(convertExpressionAst.Extent);
             if (!_usedNames.Add(identifier.Name))
             {
-                throw Error.Parse(
-                    convertExpressionAst,
-                    nameof(Strings.LocalAlreadyDefined),
-                    Strings.LocalAlreadyDefined,
-                    identifier.Name);
+                throw ILParseException.Create(
+                    convertExpressionAst.Extent,
+                    nameof(SR.LocalAlreadyDefined),
+                    SR.Format(SR.LocalAlreadyDefined, identifier.Name));
             }
 
             _identifiers.Add(identifier);

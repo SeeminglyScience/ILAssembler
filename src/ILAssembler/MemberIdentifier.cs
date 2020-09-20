@@ -22,10 +22,10 @@ namespace ILAssembler
 
         protected virtual ILParseException ErrorMemberNotFound(IScriptExtent subject)
         {
-            return Error.Parse(
+            return ILParseException.Create(
                 subject,
-                nameof(Strings.MemberNotFound),
-                Strings.MemberNotFound);
+                nameof(SR.MemberNotFound),
+                SR.MemberNotFound);
         }
 
         protected virtual BindingFlags GetFlags()

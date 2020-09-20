@@ -24,13 +24,42 @@ namespace ILAssembler
         {
         }
 
-        public ILParseException(ParseError[] errors) : base(errors)
+        internal ILParseException(ParseError[] errors) : base(errors)
         {
         }
 
-        public ILParseException(ParseError[] errors, ExceptionDispatchInfo sourceException) : base(errors)
+        internal ILParseException(ParseError[] errors, ExceptionDispatchInfo sourceException) : base(errors)
         {
             SourceExceptionInfo = sourceException ?? throw new ArgumentNullException(nameof(sourceException));
+        }
+
+        internal static ILParseException Create(IScriptExtent extent, string errorId, ExceptionDispatchInfo inner)
+        {
+            return new ILParseException(
+                new[]
+                {
+                    new ParseError(extent, errorId, inner.SourceException.Message)
+                },
+                inner);
+        }
+
+        internal static ILParseException Create(IScriptExtent extent, string errorId, string message, ExceptionDispatchInfo inner)
+        {
+            return new ILParseException(
+                new[]
+                {
+                    new ParseError(extent, errorId, message)
+                },
+                inner);
+        }
+
+        internal static ILParseException Create(IScriptExtent extent, string errorId, string message)
+        {
+            return new ILParseException(
+                new[]
+                {
+                    new ParseError(extent, errorId, message)
+                });
         }
 
         public ExceptionDispatchInfo? SourceExceptionInfo { get; }

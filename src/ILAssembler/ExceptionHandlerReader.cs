@@ -54,6 +54,7 @@ namespace ILAssembler
             FinalizePendingRegions(statementStart);
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private bool TryProcessExceptionHandlerImpl(in InstructionArguments arguments)
         {
             if (State.Expecting == Expectation.None)
@@ -94,18 +95,18 @@ namespace ILAssembler
         {
             if (State.Expecting is Expectation.AnyHandler)
             {
-                throw Error.Parse(
+                throw ILParseException.Create(
                     statementStart.StartScriptPosition.ToScriptExtent(),
-                    nameof(Strings.MissingExceptionHandler),
-                    Strings.MissingExceptionHandler);
+                    nameof(SR.MissingExceptionHandler),
+                    SR.MissingExceptionHandler);
             }
 
             if (State.Expecting == Expectation.UntypedCatch)
             {
-                throw Error.Parse(
+                throw ILParseException.Create(
                     statementStart.StartScriptPosition.ToScriptExtent(),
-                    nameof(Strings.MissingCatchForFilter),
-                    Strings.MissingCatchForFilter);
+                    nameof(SR.MissingCatchForFilter),
+                    SR.MissingCatchForFilter);
             }
 
             for (int i = 0; i < State.Handlers.Length; i++)
@@ -141,10 +142,10 @@ namespace ILAssembler
         {
             if (State.Expecting is not Expectation.AnyHandler)
             {
-                throw Error.Parse(
+                throw ILParseException.Create(
                     arguments.NameExtent,
-                    nameof(Strings.MixedExceptionHandlerTypes),
-                    Strings.MixedExceptionHandlerTypes);
+                    nameof(SR.MixedExceptionHandlerTypes),
+                    SR.MixedExceptionHandlerTypes);
             }
 
             if (arguments.Count == 0 || arguments[0] is not ScriptBlockExpressionAst body)
@@ -171,10 +172,10 @@ namespace ILAssembler
         {
             if (State.Expecting is Expectation.UntypedCatch)
             {
-                throw Error.Parse(
+                throw ILParseException.Create(
                     arguments.StartPosition.ToScriptExtent(),
-                    nameof(Strings.MissingCatchForFilter),
-                    Strings.MissingCatchForFilter);
+                    nameof(SR.MissingCatchForFilter),
+                    SR.MissingCatchForFilter);
             }
 
             if (arguments.Count == 0 || arguments[0] is not ScriptBlockExpressionAst body)
@@ -187,7 +188,7 @@ namespace ILAssembler
 
             if (arguments.Count > 1)
             {
-                ThrowUnexpectedToken(arguments[1].Extent);
+                Throw.UnexpectedToken(arguments[1].Extent);
                 return;
             }
 
@@ -202,7 +203,10 @@ namespace ILAssembler
         {
             if (State.Expecting is Expectation.None)
             {
-                ThrowMissingTryBlock(arguments.NameExtent);
+                throw ILParseException.Create(
+                    arguments.NameExtent,
+                    nameof(SR.MissingPrecedingTry),
+                    SR.MissingPrecedingTry);
             }
 
             if (arguments.Count == 0 || arguments[0] is not ScriptBlockExpressionAst)
@@ -216,14 +220,15 @@ namespace ILAssembler
             {
                 if (State.Expecting is Expectation.UntypedCatch)
                 {
-                    ThrowUntypedCatchRequired(arguments[0].Extent);
-                    return;
+                    throw ILParseException.Create(
+                        arguments[0].Extent,
+                        nameof(SR.UntypedCatchRequired),
+                        SR.UntypedCatchRequired);
                 }
 
                 if (arguments[1] is not ScriptBlockExpressionAst)
                 {
                     ThrowMissingCatchBody(arguments[1].Extent.StartScriptPosition.ToScriptExtent());
-                    return;
                 }
 
                 handlerRegion = ProcessBody((ScriptBlockExpressionAst)arguments[1]);
@@ -242,7 +247,7 @@ namespace ILAssembler
 
             if (arguments.Count > 2)
             {
-                ThrowUnexpectedToken(arguments[2].Extent);
+                Throw.UnexpectedToken(arguments[2].Extent);
                 return;
             }
 
@@ -255,53 +260,24 @@ namespace ILAssembler
             handlerRegion = ProcessBody((ScriptBlockExpressionAst)arguments[0]);
             State.Handlers[^1].Body = handlerRegion;
             State.Expecting = Expectation.FilterOrCatch;
-
-            [DoesNotReturn, MethodImpl(MethodImplOptions.NoInlining)]
-            static void ThrowUntypedCatchRequired(IScriptExtent extent)
-            {
-                throw Error.Parse(
-                    extent,
-                    nameof(Strings.UntypedCatchRequired),
-                    Strings.UntypedCatchRequired);
-            }
         }
 
         [DoesNotReturn, MethodImpl(MethodImplOptions.NoInlining)]
         private static void ThrowMissingCatchBody(IScriptExtent extent)
         {
-            throw Error.Parse(
+            throw ILParseException.Create(
                 extent,
-                nameof(Strings.MissingCatchBody),
-                Strings.MissingCatchBody);
+                nameof(SR.MissingCatchBody),
+                SR.MissingCatchBody);
         }
 
         [DoesNotReturn, MethodImpl(MethodImplOptions.NoInlining)]
         private static void ThrowMissingExceptionHandlerBody(IScriptExtent extent, string kind)
         {
-            throw Error.Parse(
+            throw ILParseException.Create(
                 extent,
-                nameof(Strings.MissingExceptionHandlerBody),
-                Strings.MissingExceptionHandlerBody,
-                kind);
-        }
-
-        [DoesNotReturn, MethodImpl(MethodImplOptions.NoInlining)]
-        private static void ThrowUnexpectedToken(IScriptExtent extent)
-        {
-            throw Error.Parse(
-                extent,
-                nameof(Strings.UnexpectedToken),
-                Strings.UnexpectedToken,
-                extent.Text);
-        }
-
-        [DoesNotReturn, MethodImpl(MethodImplOptions.NoInlining)]
-        private static void ThrowMissingTryBlock(IScriptExtent extent)
-        {
-            throw Error.Parse(
-                extent,
-                nameof(Strings.MissingPrecedingTry),
-                Strings.MissingPrecedingTry);
+                nameof(SR.MissingExceptionHandlerBody),
+                SR.Format(SR.MissingExceptionHandlerBody, kind));
         }
 
         private Region ProcessBody(ScriptBlockExpressionAst body)
@@ -322,8 +298,10 @@ namespace ILAssembler
         {
             if (arguments.Count == 0 || arguments[0] is not ScriptBlockExpressionAst body)
             {
-                Throw.MissingTryStatementBlock(arguments.StartPosition.ToScriptExtent());
-                return;
+                throw ILParseException.Create(
+                    arguments.StartPosition.ToScriptExtent(),
+                    nameof(SR.MissingTryStatementBlock),
+                    SR.MissingTryStatementBlock);
             }
 
             LabelHandle start = _context.BranchBuilder.DefineLabel();

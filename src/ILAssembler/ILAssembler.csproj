@@ -20,15 +20,27 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="$(IntermediateOutputPath)\Strings.Designer.cs" />
+    <!--
+      omnisharp-vscode doesn't seem to pick this up without this.
+      For now we'll ignore the compiler warning
+    -->
+    <Compile Include="$(IntermediateOutputPath)\SR.Designer.cs" />
     <EmbeddedResource Update="Strings.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <StronglyTypedFileName>$(IntermediateOutputPath)\Strings.Designer.cs</StronglyTypedFileName>
-      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+      <StronglyTypedFileName>$(IntermediateOutputPath)\SR.Designer.cs</StronglyTypedFileName>
+      <LastGenOutput>SR.Designer.cs</LastGenOutput>
       <StronglyTypedLanguage>CSharp</StronglyTypedLanguage>
       <StronglyTypedNamespace>ILAssembler</StronglyTypedNamespace>
-      <StronglyTypedClassName>Strings</StronglyTypedClassName>
+      <StronglyTypedClassName>SR</StronglyTypedClassName>
     </EmbeddedResource>
   </ItemGroup>
+    
+  <!-- There's gotta be a better way to do this. Just makes the strongly typed res file "partial". -->
+  <Target Name="FixResGen" BeforeTargets="AfterResGen">
+    <Exec
+      ConsoleToMsBuild="true"
+      Command="pwsh -NoLogo -NoProfile -NonInteractive -Command &quot;Set-Content '$(IntermediateOutputPath)\SR.Designer.cs' ((Get-Content '$(IntermediateOutputPath)\SR.Designer.cs' -Raw) -replace '(?m)^(\s*internal )class', '$1partial class')&quot;"
+      />
+  </Target>
 
 </Project>

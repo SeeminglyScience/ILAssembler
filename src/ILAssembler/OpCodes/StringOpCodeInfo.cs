@@ -14,10 +14,11 @@ namespace ILAssembler.OpCodes
             arguments.AssertArgumentCount(1);
             if (arguments[0] is not StringConstantExpressionAst stringConstant)
             {
-                throw Error.UnexpectedType(arguments[0], "string");
+                Throw.UnexpectedType(arguments[0], "string");
+                return;
             }
 
-            var token = context.ILInfo.GetTokenFor(stringConstant.Value);
+            int token = context.ILInfo.GetTokenFor(stringConstant.Value);
             context.Encoder.OpCode(OpCode);
             context.Encoder.Token(token);
         }

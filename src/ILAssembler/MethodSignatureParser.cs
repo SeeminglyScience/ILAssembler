@@ -23,10 +23,10 @@ namespace ILAssembler
         {
             if (ReturnType is null)
             {
-                throw Error.Parse(
+                throw ILParseException.Create(
                     subject,
-                    nameof(Strings.ReturnTypeNotFound),
-                    Strings.ReturnTypeNotFound);
+                    nameof(SR.ReturnTypeNotFound),
+                    SR.ReturnTypeNotFound);
             }
 
             bool isCtor = !_rejectCtor
@@ -81,10 +81,10 @@ namespace ILAssembler
 
         protected override ILParseException ErrorExpectedSignature(IScriptExtent extent)
         {
-            return Error.Parse(
+            return ILParseException.Create(
                 extent,
-                nameof(Strings.ExpectedMethodSignature),
-                Strings.ExpectedMethodSignature);
+                nameof(SR.ExpectedMethodSignature),
+                SR.ExpectedMethodSignature);
         }
 
         protected override void VisitAnonymousSignature(ExpressionAst expressionAst)
@@ -102,33 +102,36 @@ namespace ILAssembler
 
                 if (arrayExpressionAst.SubExpression.Statements.Count > 1)
                 {
-                    throw Error.Parse(
+                    throw ILParseException.Create(
                         arrayExpressionAst.SubExpression.Statements[1].Extent.StartScriptPosition.ToScriptExtent(),
-                        nameof(Strings.MissingEndParenthesisInExpression),
-                        Strings.MissingEndParenthesisInExpression);
+                        nameof(SR.MissingEndParenthesisInExpression),
+                        SR.MissingEndParenthesisInExpression);
                 }
 
-                if (arrayExpressionAst.SubExpression.Statements[0] is PipelineAst)
+                if (arrayExpressionAst.SubExpression.Statements[0] is PipelineAst ast)
                 {
-                    pipe = (PipelineAst)arrayExpressionAst.SubExpression.Statements[0];
+                    pipe = ast;
                 }
                 else
                 {
-                    throw Error.ElementNotSupported(arrayExpressionAst.SubExpression.Statements[0]);
+                    Throw.ElementNotSupported(arrayExpressionAst.SubExpression.Statements[0]);
+                    return;
                 }
             }
             else if (expressionAst is ParenExpressionAst parenExpression)
             {
                 if (parenExpression.Pipeline is not PipelineAst)
                 {
-                    throw Error.ElementNotSupported(parenExpression.Pipeline);
+                    Throw.ElementNotSupported(parenExpression.Pipeline);
+                    return;
                 }
 
                 pipe = (PipelineAst)parenExpression.Pipeline;
             }
             else
             {
-                throw Error.ElementNotSupported(expressionAst);
+                Throw.ElementNotSupported(expressionAst);
+                return;
             }
 
             if (pipe.PipelineElements.Count == 0)
@@ -139,13 +142,16 @@ namespace ILAssembler
 
             if (pipe.PipelineElements.Count > 1)
             {
-                throw Error.MissingEndParenthesisInExpression(
-                    pipe.PipelineElements[1].Extent.StartScriptPosition.ToScriptExtent());
+                throw ILParseException.Create(
+                    pipe.PipelineElements[1].Extent.StartScriptPosition.ToScriptExtent(),
+                    nameof(SR.MissingEndParenthesisInExpression),
+                    SR.MissingEndParenthesisInExpression);
             }
 
-            if (!(pipe.PipelineElements[0] is CommandExpressionAst commandExpression))
+            if (pipe.PipelineElements[0] is not CommandExpressionAst commandExpression)
             {
-                throw Error.ElementNotSupported(pipe.PipelineElements[0]);
+                Throw.ElementNotSupported(pipe.PipelineElements[0]);
+                return;
             }
 
             if (commandExpression.Expression is ArrayLiteralAst arrayLiteral)
@@ -161,7 +167,7 @@ namespace ILAssembler
                 return;
             }
 
-            throw Error.ElementNotSupported(commandExpression.Expression);
+            Throw.ElementNotSupported(commandExpression.Expression);
         }
 
         private void HandleParameters(ReadOnlyListSegment<ExpressionAst> parameters = default)

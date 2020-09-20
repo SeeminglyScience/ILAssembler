@@ -71,15 +71,15 @@ namespace ILAssembler.OpCodes
 
         protected override int GetIndex(CilAssemblyContext context, VariableExpressionAst variable)
         {
-            var index = context.Locals is null
+            int index = context.Locals is null
                 ? -1
                 : Array.IndexOf(context.Locals, variable.VariablePath.UserPath);
             if (index == -1)
             {
-                throw Error.Parse(
-                    variable,
-                    nameof(Strings.UndefinedLocal),
-                    Strings.UndefinedLocal);
+                Throw.ParseException(
+                    variable.Extent,
+                    nameof(SR.UndefinedLocal),
+                    SR.UndefinedLocal);
             }
 
             return index;

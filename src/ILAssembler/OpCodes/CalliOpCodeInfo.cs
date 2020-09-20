@@ -1,7 +1,9 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Management.Automation.Language;
 using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
+using System.Runtime.CompilerServices;
 
 namespace ILAssembler.OpCodes
 {
@@ -15,7 +17,7 @@ namespace ILAssembler.OpCodes
         {
             if (arguments.Count < 1)
             {
-                throw Error.IncompleteCalli(arguments.StartPosition.ToScriptExtent());
+                ThrowIncompleteCalli(arguments.StartPosition.ToScriptExtent());
             }
 
             SignatureCallingConvention? callingConvention = null;
@@ -27,79 +29,80 @@ namespace ILAssembler.OpCodes
                 {
                     if (callingConvention is not null)
                     {
-                        throw Error.Parse(
-                            stringConstant,
-                            nameof(Strings.UnexpectedCallingConvention),
-                            Strings.UnexpectedCallingConvention);
+                        throw ILParseException.Create(
+                            stringConstant.Extent,
+                            nameof(SR.UnexpectedCallingConvention),
+                            SR.UnexpectedCallingConvention);
                     }
 
-                    if (stringConstant.Value.Equals("vararg", StringComparison.Ordinal))
+                    if (stringConstant.Value is "vararg")
                     {
                         callingConvention = SignatureCallingConvention.VarArgs;
                         continue;
                     }
 
-                    if (stringConstant.Value.Equals("default", StringComparison.Ordinal))
+                    if (stringConstant.Value is "default")
                     {
                         callingConvention = SignatureCallingConvention.Default;
                         continue;
                     }
 
-                    if (stringConstant.Value.Equals("unmanaged", StringComparison.Ordinal))
+                    if (stringConstant.Value is "unmanaged")
                     {
                         i++;
-                        if (i >= arguments.Count || !(arguments[i] is StringConstantExpressionAst nextString))
+                        if (i >= arguments.Count || arguments[i] is not StringConstantExpressionAst nextString)
                         {
-                            throw Error.IncompleteCalli(
+                            ThrowIncompleteCalli(
                                 stringConstant.Extent.EndScriptPosition.ToScriptExtent());
+                            return;
                         }
 
-                        if (nextString.Value.Equals("cdecl", StringComparison.Ordinal))
+                        if (nextString.Value is "cdecl")
                         {
                             callingConvention = SignatureCallingConvention.CDecl;
                             continue;
                         }
 
-                        if (nextString.Value.Equals("stdcall", StringComparison.Ordinal))
+                        if (nextString.Value is "stdcall")
                         {
                             callingConvention = SignatureCallingConvention.StdCall;
                             continue;
                         }
 
-                        if (nextString.Value.Equals("thiscall", StringComparison.Ordinal))
+                        if (nextString.Value is "thiscall")
                         {
                             callingConvention = SignatureCallingConvention.ThisCall;
                             continue;
                         }
 
-                        if (nextString.Value.Equals("fastcall", StringComparison.Ordinal))
+                        if (nextString.Value is "fastcall")
                         {
                             callingConvention = SignatureCallingConvention.FastCall;
                             continue;
                         }
 
-                        throw Error.Parse(
-                            nextString,
-                            nameof(Strings.UnknownUnmanagedCallingConvention),
-                            Strings.UnknownUnmanagedCallingConvention);
+                        throw ILParseException.Create(
+                            nextString.Extent,
+                            nameof(SR.UnknownUnmanagedCallingConvention),
+                            SR.UnknownUnmanagedCallingConvention);
                     }
 
-                    throw Error.Parse(
-                        stringConstant,
-                        nameof(Strings.UnknownCallingConvention),
-                        Strings.UnknownCallingConvention);
+                    throw ILParseException.Create(
+                        stringConstant.Extent,
+                        nameof(SR.UnknownCallingConvention),
+                        SR.UnknownCallingConvention);
                 }
 
                 if (arguments[i] is ScriptBlockExpressionAst scriptBlockExpression)
                 {
                     if (i != arguments.Count - 1)
                     {
-                        throw Error.Parse(
+                        throw ILParseException.Create(
                             ExtentOps.ExtentOf(
                                 arguments[i + 1].Extent,
                                 arguments[^1].Extent),
-                            nameof(Strings.InvalidCalliArgument),
-                            Strings.InvalidCalliArgument);
+                            nameof(SR.InvalidCalliArgument),
+                            SR.InvalidCalliArgument);
                     }
 
                     callingConvention ??= SignatureCallingConvention.Default;
@@ -116,7 +119,7 @@ namespace ILAssembler.OpCodes
 
             if (signature is null)
             {
-                throw Error.IncompleteCalli(
+                ThrowIncompleteCalli(
                     arguments[^1].Extent.EndScriptPosition.ToScriptExtent());
             }
 
@@ -160,9 +163,18 @@ namespace ILAssembler.OpCodes
                     }
             });
 
-            var token = context.ILInfo.GetTokenFor(blobEncoder.Builder.ToArray());
+            int token = context.ILInfo.GetTokenFor(blobEncoder.Builder.ToArray());
             context.Encoder.OpCode(ILOpCode.Calli);
             context.Encoder.Token(token);
+        }
+
+        [DoesNotReturn, MethodImpl(MethodImplOptions.NoInlining)]
+        private static void ThrowIncompleteCalli(IScriptExtent subject)
+        {
+            throw ILParseException.Create(
+                subject,
+                nameof(SR.IncompleteCalli),
+                SR.IncompleteCalli);
         }
     }
 }

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Management.Automation.Language;
 using System.Reflection;
 
@@ -15,10 +16,9 @@ namespace ILAssembler
 
         public override int GetToken(CilAssemblyContext context, IScriptExtent subject)
         {
-            if (DeclaringType?.Type is null)
-            {
-                throw Error.MissingDeclaringType(subject);
-            }
+            Debug.Assert(
+                DeclaringType is not null,
+                "FieldSignatureParser.GetMemberIdentifier should have thrown when declaring type is null.");
 
             FieldInfo? field = DeclaringType.Type.GetField(
                 Name,
