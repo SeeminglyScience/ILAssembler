@@ -31,12 +31,22 @@ namespace ILAssembler
 
         public override void VisitNamedBlock(NamedBlockAst namedBlockAst)
         {
+            if (namedBlockAst.Statements.Count == 0)
+            {
+                Throw.ParseException(
+                    namedBlockAst.Extent,
+                    nameof(Strings.MissingSignatureBody),
+                    Strings.MissingSignatureBody);
+                return;
+            }
+
             if (namedBlockAst.Statements.Count > 1)
             {
-                throw Error.Parse(
-                    namedBlockAst.Statements[1],
+                Throw.ParseException(
+                    namedBlockAst.Statements[1].Extent,
                     nameof(Strings.InvalidStatementCount),
                     Strings.InvalidStatementCount);
+                return;
             }
 
             namedBlockAst.Statements[0].Visit(this);

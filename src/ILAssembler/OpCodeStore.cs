@@ -199,6 +199,7 @@ namespace ILAssembler
             Add(new NoOperandOpCodeInfo("sub.ovf", ILOpCode.Sub_ovf));
             Add(new NoOperandOpCodeInfo("sub.ovf.un", ILOpCode.Sub_ovf_un));
             Add(new NoOperandOpCodeInfo("endfinally", ILOpCode.Endfinally));
+            Add(new NoOperandOpCodeInfo("endfault", ILOpCode.Endfinally));
             Add(new BranchOpCodeInfo("leave", ILOpCode.Leave));
             Add(new BranchOpCodeInfo("leave.s", ILOpCode.Leave_s));
             Add(new NoOperandOpCodeInfo("stind.i", ILOpCode.Stind_i));

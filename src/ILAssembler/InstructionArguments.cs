@@ -10,18 +10,20 @@ namespace ILAssembler
     {
         internal readonly IScriptPosition StartPosition;
 
-        internal readonly string CommandName;
+        internal readonly IScriptExtent NameExtent;
+
+        internal string CommandName => NameExtent.Text;
 
         private readonly ReadOnlyListSegment<CommandElementAst> _list;
 
         internal InstructionArguments(
             ReadOnlyListSegment<CommandElementAst> list,
             IScriptPosition startPosition,
-            string commandName)
+            IScriptExtent nameExtent)
         {
             _list = list;
             StartPosition = startPosition;
-            CommandName = commandName;
+            NameExtent = nameExtent;
         }
 
         public CommandElementAst this[int index] => _list[index];
@@ -42,9 +44,10 @@ namespace ILAssembler
         {
             Debug.Assert(Count > 0);
 
-            if (_list[0] is StringConstantExpressionAst stringConstant && !string.IsNullOrEmpty(stringConstant.Value))
+            if (_list[0] is StringConstantExpressionAst stringConstant
+                and { Value: { Length: > 0 }, StringConstantType: StringConstantType.BareWord })
             {
-                return Slice(1, commandName: stringConstant.Value);
+                return Slice(1, commandName: stringConstant.Extent);
             }
 
             Throw.CannotReadCommandName(_list[0].Extent);
@@ -52,24 +55,18 @@ namespace ILAssembler
             return default;
         }
 
-        internal InstructionArguments Slice(int start, int? length = null, string? commandName = null)
+        internal InstructionArguments Slice(int start, int? length = null, IScriptExtent? commandName = null)
         {
-            IScriptPosition newStartPosition;
-            if (start is 0)
-            {
-                newStartPosition = StartPosition;
-            }
-            else
-            {
-                newStartPosition = _list[start - 1].Extent.EndScriptPosition;
-            }
+            IScriptPosition newStartPosition = start is 0
+                ? StartPosition
+                : _list[start - 1].Extent.EndScriptPosition;
 
             return new InstructionArguments(
                 _list.Slice(
                     start,
                     length ?? (_list.Count - start)),
                 newStartPosition,
-                commandName ?? CommandName);
+                commandName ?? NameExtent);
         }
 
         public ReadOnlyListSegment<CommandElementAst>.Enumerator GetEnumerator()

@@ -240,4 +240,37 @@
   <data name="LocalsModAlreadySpecified" xml:space="preserve">
     <value>The locals modifier "{0}" must be specified only once.</value>
   </data>
+  <data name="MissingTryStatementBlock" xml:space="preserve">
+    <value>The try statement is missing its statement block.</value>
+  </data>
+  <data name="MissingExceptionHandler" xml:space="preserve">
+    <value>The try statement is missing its catch, filter, finally, or fault statement.</value>
+  </data>
+  <data name="MissingPrecedingTry" xml:space="preserve">
+    <value>The exception handler is missing it's preceding try statement.</value>
+  </data>
+  <data name="UntypedCatchRequired" xml:space="preserve">
+    <value>A catch statement that follows a "filter" statement must be untyped.</value>
+  </data>
+  <data name="MissingCatchBody" xml:space="preserve">
+    <value>The catch statement is missing its type declaration and/or statement block.</value>
+  </data>
+  <data name="MissingCatchForFilter" xml:space="preserve">
+    <value>The preceding filter statement is missing its catch statement.</value>
+  </data>
+  <data name="MissingExceptionHandlerBody" xml:space="preserve">
+    <value>The {0} statement is missing its statement block.</value>
+  </data>
+  <data name="UnexpectedToken" xml:space="preserve">
+    <value>Unexpected token '{0}' in expression or statement.</value>
+  </data>
+  <data name="MixedExceptionHandlerTypes" xml:space="preserve">
+    <value>A finally or fault statement cannot share a try region with catch statements.</value>
+  </data>
+  <data name="MissingSignatureBody" xml:space="preserve">
+    <value>Expected signature body.</value>
+  </data>
+  <data name="TryStatementNotSupported" xml:space="preserve">
+    <value>The PowerShell syntax for try/catch/finally is not supported. Use '.try' instead.</value>
+  </data>
 </root>

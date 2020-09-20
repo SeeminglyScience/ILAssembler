@@ -65,7 +65,7 @@ FunctionsToExport =
     'conv.ovf.i2', 'conv.ovf.u2', 'conv.ovf.i4', 'conv.ovf.u4', 'conv.ovf.i8', 'conv.ovf.u8',
     'refanyval', 'ckfinite', 'mkrefany', 'ldtoken', 'conv.u2', 'conv.u1', 'conv.i', 'conv.ovf.i',
     'conv.ovf.u', 'add.ovf', 'add.ovf.un', 'mul.ovf', 'mul.ovf.un', 'sub.ovf', 'sub.ovf.un',
-    'endfinally', 'leave', 'leave.s', 'stind.i', 'conv.u', 'arglist', 'ceq', 'cgt', 'cgt.un',
+    'endfinally', 'endfault', 'leave', 'leave.s', 'stind.i', 'conv.u', 'arglist', 'ceq', 'cgt', 'cgt.un',
     'clt', 'clt.un', 'ldftn', 'ldvirtftn', 'ldarg', 'ldarga', 'starg', 'ldloc', 'ldloca',
     'stloc', 'localloc', 'endfilter', 'unaligned.', 'volatile.', 'tail.', 'initobj', 'constrained.',
     'cpblk', 'initblk', 'rethrow', 'sizeof', 'refanytype', 'readonly.', 'switch'
