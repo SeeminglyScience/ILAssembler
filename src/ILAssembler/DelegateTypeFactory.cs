@@ -21,36 +21,11 @@ namespace ILAssembler
 
         private static int s_anonymousDelegateId;
 
-        private static readonly ConcurrentDictionary<string, Type> s_namedTypes = new();
-
         private static readonly ConcurrentDictionary<SignatureKey, Type> s_anonymousTypes = new();
 
-        public static Type GetDelegateType(
-            MethodIdentifier method,
-            bool shouldCreateDelegate,
-            System.Management.Automation.Language.IScriptExtent subject)
+        public static Type GetDelegateType(MethodIdentifier method)
         {
             var signatureKey = new SignatureKey(method.ReturnType, method.Parameters);
-            // if (shouldCreateDelegate)
-            // {
-            //     if (method.DeclaringType.TypeName is null)
-            //     {
-            //         throw new ArgumentNullException(nameof(method.DeclaringType.TypeName));
-            //     }
-
-            //     var namedDelegate = s_namedTypes.GetOrAdd(
-            //         method.DeclaringType.TypeName.FullName,
-            //         name => CreateDelegateBySignatureKey(name, signatureKey));
-
-            //     if (!IsSignatureMatch(in signatureKey, namedDelegate.GetMethod("Invoke")))
-            //     {
-            //         throw subject.GetParseError(
-            //             "DelegateTypeAlreadyExists",
-            //             "A delegate with an incompatible signature has already been declared with this name.");
-            //     }
-
-            //     return namedDelegate;
-            // }
 
             if (CanBeGenericDelegate(in signatureKey))
             {
@@ -98,7 +73,7 @@ namespace ILAssembler
                 typeof(MulticastDelegate));
 
             MethodBuilder method = type.DefineMethod(
-                "Invoke",
+                nameof(Action.Invoke),
                 MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig | MethodAttributes.NewSlot,
                 key.ReturnType.GetModifiedType(),
                 key.Parameters.ToModifiedTypeArray());

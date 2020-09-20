@@ -30,7 +30,7 @@ namespace ILAssembler
 
         public override void VisitCommandExpression(CommandExpressionAst commandExpressionAst)
         {
-            if (!(commandExpressionAst.Expression is ConvertExpressionAst convert))
+            if (commandExpressionAst.Expression is not ConvertExpressionAst convert)
             {
                 throw ErrorExpectedSignature(commandExpressionAst.Expression.Extent);
             }
@@ -67,12 +67,12 @@ namespace ILAssembler
                 HandleUnresolvableSubject(memberExpressionAst.Expression);
             }
 
-            if (!(memberExpressionAst.Member is StringConstantExpressionAst stringConstant))
+            if (memberExpressionAst.Member is not StringConstantExpressionAst stringConstant)
             {
-                throw Error.Parse(
-                    memberExpressionAst.Member,
-                    nameof(Strings.ExpectedConstantMemberName),
-                    Strings.ExpectedConstantMemberName);
+                throw ILParseException.Create(
+                    memberExpressionAst.Member.Extent,
+                    nameof(SR.ExpectedConstantMemberName),
+                    SR.ExpectedConstantMemberName);
             }
 
             Name = stringConstant.Value;
@@ -81,15 +81,15 @@ namespace ILAssembler
 
         protected virtual void VisitAnonymousSignature(ExpressionAst expressionAst)
         {
-            throw Error.UnexpectedType(expressionAst, "MemberExpression");
+            Throw.UnexpectedType(expressionAst, "MemberExpression");
         }
 
         protected virtual void HandleUnresolvableSubject(ExpressionAst ast)
         {
-            throw Error.Parse(
-                ast,
-                nameof(Strings.ExpectedTypeExpression),
-                Strings.ExpectedTypeExpression);
+            throw ILParseException.Create(
+                ast.Extent,
+                nameof(SR.ExpectedTypeExpression),
+                SR.ExpectedTypeExpression);
         }
 
         protected abstract ILParseException ErrorExpectedSignature(IScriptExtent extent);

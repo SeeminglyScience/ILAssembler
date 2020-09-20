@@ -95,12 +95,10 @@ namespace ILAssembler
                 extentToThrow = StartPosition.ToScriptExtent();
             }
 
-            throw Error.Parse(
+            Throw.ParseException(
                 extentToThrow,
-                nameof(Strings.UnexpectedArgument),
-                Strings.UnexpectedArgument,
-                expectedCount,
-                CommandName);
+                nameof(SR.UnexpectedArgument),
+                SR.Format(SR.UnexpectedArgument, expectedCount, CommandName));
         }
     }
 }

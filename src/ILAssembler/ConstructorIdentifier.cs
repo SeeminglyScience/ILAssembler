@@ -31,10 +31,10 @@ namespace ILAssembler
 
             if (DeclaringType?.Type is null)
             {
-                throw Error.Parse(
+                throw ILParseException.Create(
                     subject,
-                    nameof(Strings.MissingDeclaringType),
-                    Strings.MissingDeclaringType);
+                    nameof(SR.MissingDeclaringType),
+                    SR.MissingDeclaringType);
             }
 
             ConstructorInfo? resolvedCtor = DeclaringType.Type.GetConstructor(

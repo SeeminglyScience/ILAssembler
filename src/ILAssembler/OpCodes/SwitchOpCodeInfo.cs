@@ -24,10 +24,10 @@ namespace ILAssembler.OpCodes
             }
             else
             {
-                throw Error.Parse(
+                throw ILParseException.Create(
                     arguments.StartPosition.ToScriptExtent(),
-                    nameof(Strings.MissingBranches),
-                    Strings.MissingBranches);
+                    nameof(SR.MissingBranches),
+                    SR.MissingBranches);
             }
 
             var labels = new LabelHandle[branches.Count];
@@ -35,10 +35,10 @@ namespace ILAssembler.OpCodes
             {
                 if (branches[i] is not StringConstantExpressionAst branchName)
                 {
-                    throw Error.Parse(
-                        branches[i],
-                        nameof(Strings.MissingBranchName),
-                        Strings.MissingBranchName);
+                    throw ILParseException.Create(
+                        branches[i].Extent,
+                        nameof(SR.MissingBranchName),
+                        SR.MissingBranchName);
                 }
 
                 labels[i] = context.GetOrAddLabel(branchName.Value);

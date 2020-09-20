@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Management.Automation;
 using System.Management.Automation.Language;
+using System.Runtime.ExceptionServices;
 
 namespace ILAssembler
 {
@@ -25,7 +26,8 @@ namespace ILAssembler
             Debug.Assert(typeof(T).IsPrimitive);
             if (element is not ConstantExpressionAst constant)
             {
-                throw Error.UnexpectedType(element, GetILAsmName(typeof(T)));
+                Throw.UnexpectedType(element, GetILAsmName(typeof(T)));
+                return default;
             }
 
             try
@@ -34,7 +36,10 @@ namespace ILAssembler
             }
             catch (Exception e)
             {
-                throw Error.Parse(element, "InvalidArgumentValue", e.Message);
+                throw ILParseException.Create(
+                    element.Extent,
+                    "InvalidArgumentValue",
+                    ExceptionDispatchInfo.Capture(e));
             }
         }
 
@@ -80,12 +85,10 @@ namespace ILAssembler
                 extentToThrow = new ScriptExtent(sp, sp);
             }
 
-            throw Error.Parse(
+            throw ILParseException.Create(
                 extentToThrow,
-                nameof(Strings.UnexpectedArgument),
-                Strings.UnexpectedArgument,
-                expectedCount,
-                command.GetCommandName().ToLowerInvariant());
+                nameof(SR.UnexpectedArgument),
+                SR.Format(SR.UnexpectedArgument, expectedCount, command.GetCommandName().ToLowerInvariant()));
         }
 
         public static IScriptExtent ToScriptExtent(this IScriptPosition position)

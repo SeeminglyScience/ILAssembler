@@ -25,7 +25,8 @@ namespace ILAssembler.OpCodes
             arguments.AssertArgumentCount(1);
             if (arguments[0] is not VariableExpressionAst variable)
             {
-                throw Error.UnexpectedType(arguments[0], "variable");
+                Throw.UnexpectedType(arguments[0], "variable");
+                return;
             }
 
             var index = GetIndex(context, variable);

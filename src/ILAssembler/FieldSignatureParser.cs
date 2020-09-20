@@ -8,23 +8,17 @@ namespace ILAssembler
         {
             if (DeclaringType is null)
             {
-                throw Error.MissingDeclaringType(subject);
+                Throw.ParseException(subject, nameof(SR.MissingDeclaringType), SR.MissingDeclaringType);
             }
 
             if (ReturnType is null)
             {
-                throw Error.Parse(
-                    subject,
-                    nameof(Strings.FieldTypeNotFound),
-                    Strings.FieldTypeNotFound);
+                Throw.ParseException(subject, nameof(SR.FieldTypeNotFound), SR.FieldTypeNotFound);
             }
 
             if (Name is null)
             {
-                throw Error.Parse(
-                    subject,
-                    nameof(Strings.FieldNameNotFound),
-                    Strings.FieldNameNotFound);
+                Throw.ParseException(subject, nameof(SR.FieldNameNotFound), SR.FieldNameNotFound);
             }
 
             var result = new FieldIdentifier(
@@ -44,10 +38,10 @@ namespace ILAssembler
 
         protected override ILParseException ErrorExpectedSignature(IScriptExtent extent)
         {
-            return Error.Parse(
+            return ILParseException.Create(
                 extent,
-                nameof(Strings.ExpectedFieldSignature),
-                Strings.ExpectedFieldSignature);
+                nameof(SR.ExpectedFieldSignature),
+                SR.ExpectedFieldSignature);
         }
     }
 }

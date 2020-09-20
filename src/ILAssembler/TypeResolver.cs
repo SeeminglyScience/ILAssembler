@@ -1,6 +1,7 @@
 using System;
-using System.Management.Automation;
+using System.Diagnostics.CodeAnalysis;
 using System.Management.Automation.Language;
+using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 
 namespace ILAssembler
@@ -21,7 +22,7 @@ namespace ILAssembler
 
             if (typeName is not GenericTypeName genericTypeName)
             {
-                return typeName.GetReflectionType() ?? throw ErrorTypeNotFound(typeName.Extent);
+                return typeName.GetReflectionType() ?? ThrowTypeNotFound(typeName.Extent);
             }
 
             if (genericTypeName.TypeName.FullName.Equals(SpecialTypes.ByRef, StringComparison.Ordinal)
@@ -39,7 +40,7 @@ namespace ILAssembler
                 return realType.MakePointerType();
             }
 
-            var genericDefinition = GetGenericTypeDefinition(
+            Type genericDefinition = GetGenericTypeDefinition(
                 genericTypeName.TypeName,
                 genericTypeName.GenericArguments.Count);
 
@@ -55,7 +56,7 @@ namespace ILAssembler
             }
             catch (Exception e)
             {
-                throw Error.Parse(
+                throw ILParseException.Create(
                     typeName.Extent,
                     "InvalidGenericArguments",
                     ExceptionDispatchInfo.Capture(e));
@@ -75,19 +76,19 @@ namespace ILAssembler
 
             if (type is null)
             {
-                throw ErrorTypeNotFound(typeName.Extent);
+                ThrowTypeNotFound(typeName.Extent);
             }
 
             return type;
         }
 
-        private static ParseException ErrorTypeNotFound(IScriptExtent extent)
+        [DoesNotReturn, MethodImpl(MethodImplOptions.NoInlining)]
+        private static Type ThrowTypeNotFound(IScriptExtent extent)
         {
-            return Error.Parse(
+            throw ILParseException.Create(
                 extent,
-                nameof(Strings.TypeNotFound),
-                Strings.TypeNotFound,
-                extent.Text);
+                nameof(SR.TypeNotFound),
+                SR.Format(SR.TypeNotFound, extent.Text));
         }
 
         private static void AssertSingleGenericArgument(GenericTypeName typeName)
@@ -101,11 +102,10 @@ namespace ILAssembler
                 typeName.GenericArguments[1].Extent,
                 typeName.GenericArguments[^1].Extent);
 
-            throw Error.Parse(
+            Throw.ParseException(
                 extentToThrow,
-                nameof(Strings.SingleGenericArgumentExpected),
-                Strings.SingleGenericArgumentExpected,
-                typeName.TypeName);
+                nameof(SR.SingleGenericArgumentExpected),
+                SR.Format(SR.SingleGenericArgumentExpected, typeName.TypeName));
         }
     }
 }

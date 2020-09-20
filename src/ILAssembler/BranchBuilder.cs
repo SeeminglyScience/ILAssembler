@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
+using System.Diagnostics;
 using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
 using System.Threading;
@@ -20,7 +20,6 @@ namespace ILAssembler
         private List<ExceptionHandlerInfo>? _lazyExceptionHandlers;
 
         private int _nextLabelId;
-
 
         public BranchBuilder(InstructionEncoder encoder)
         {
@@ -182,7 +181,7 @@ namespace ILAssembler
             }
         }
 
-        private void SerializeExceptionTableHeader(BlobBuilder builder, int exceptionRegionCount, bool hasSmallRegions)
+        private static void SerializeExceptionTableHeader(BlobBuilder builder, int exceptionRegionCount, bool hasSmallRegions)
         {
             const int TableHeaderSize = 4;
 
@@ -327,13 +326,26 @@ namespace ILAssembler
 
         private int GetLabelOffsetChecked(LabelHandle label)
         {
-            if (_marks is null || !_marks.TryGetValue(label, out int offset))
+            int offset = 0;
+            if (_marks is null || !_marks.TryGetValue(label, out offset))
             {
-                throw new InvalidOperationException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        "Label {0} has not been marked.",
-                        label.Value));
+                Debug.Assert(
+                    _labels is not null,
+                    "GetLabelOffsetChecked should not be called if no labels were created.");
+
+                string? labelName = null;
+                foreach (var kvp in _labels)
+                {
+                    if (kvp.Value.Equals(label))
+                    {
+                        labelName = kvp.Key;
+                    }
+                }
+
+                Throw.InvalidOperationException(
+                    SR.Format(
+                        SR.LabelNotMarked,
+                        (object?)labelName ?? label.Value));
             }
 
             return offset;

@@ -75,10 +75,7 @@ namespace ILAssembler.Commands
                     Signature!.Ast.Visit(signatureParser);
                     var signature = (MethodIdentifier)signatureParser.GetMemberIdentifier(Signature!.Ast.Extent);
 
-                    DelegateType = DelegateTypeFactory.GetDelegateType(
-                        signature,
-                        shouldCreateDelegate: false,
-                        Signature.Ast.Extent);
+                    DelegateType = DelegateTypeFactory.GetDelegateType(signature);
 
                     method = new DynamicMethod(
                         signature.Name,

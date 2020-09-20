@@ -239,7 +239,7 @@ namespace ILAssembler
             return s_opCodes.TryGetValue(name, out info);
         }
 
-        public static void Add(OpCodeInfo info)
+        private static void Add(OpCodeInfo info)
         {
             s_opCodes.Add(info.Name, info);
         }
