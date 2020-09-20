@@ -161,6 +161,26 @@ function ldc.i4.s {
 
 Microsoft.PowerShell.Core\Export-ModuleMember -Function ldc.i4.s
 
+function endfault {
+    [CmdletBinding()]
+    param()
+    end {
+        $PSCmdlet.ThrowTerminatingError(
+            [Management.Automation.ErrorRecord]::new(
+                [Management.Automation.PSNotSupportedException]::new(
+                    'This function can only be called inside a New-ILDelegate block.'),
+                'OpCodeOutsideAssembler',
+                [Management.Automation.ErrorCategory]::NotImplemented,
+                $null));
+    }
+    <#
+        .ForwardHelpTargetName ILAssembler\endfinally
+        .ForwardHelpCategory Function
+    #>
+}
+
+Microsoft.PowerShell.Core\Export-ModuleMember -Function endfault
+
 $noOperand = {
     [CmdletBinding()]
     param()

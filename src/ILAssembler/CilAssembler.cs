@@ -12,6 +12,8 @@ namespace ILAssembler
     {
         private readonly CilAssemblyContext _context;
 
+        private readonly ExceptionHandlerReader _ehReader;
+
         private bool _preambleFinished;
 
         private int? _maxStack;
@@ -20,6 +22,7 @@ namespace ILAssembler
         {
             DynamicILInfo ilInfo = method.GetDynamicILInfo();
             _context = new CilAssemblyContext(ilInfo);
+            _ehReader = new ExceptionHandlerReader(this, _context);
         }
 
         public static void CompileTo(ScriptBlockAst body, DynamicMethod method)
@@ -49,6 +52,11 @@ namespace ILAssembler
             {
                 statement.Visit(this);
             }
+
+            if (namedBlockAst.Statements.Count is not 0)
+            {
+                _ehReader.MaybeFinalizePendingRegions(namedBlockAst.Extent);
+            }
         }
 
         public override void VisitCommandExpression(CommandExpressionAst commandExpressionAst)
@@ -58,87 +66,21 @@ namespace ILAssembler
 
         public override void VisitThrowStatement(ThrowStatementAst throwStatementAst)
         {
+            _ehReader.MaybeFinalizePendingRegions(throwStatementAst.Extent);
             _context.Encoder.OpCode(ILOpCode.Throw);
         }
 
         public override void VisitTryStatement(TryStatementAst tryStatementAst)
         {
-            var tryStart = _context.BranchBuilder.DefineLabel();
-            var tryEnd = _context.BranchBuilder.DefineLabel();
-            _context.BranchBuilder.MarkLabel(tryStart);
-            foreach (StatementAst statement in tryStatementAst.Body.Statements)
-            {
-                statement.Visit(this);
-            }
-
-            LabelHandle? finallyStart = null;
-            _context.BranchBuilder.MarkLabel(tryEnd);
-            foreach (CatchClauseAst clause in tryStatementAst.CatchClauses)
-            {
-                Type catchType;
-                if (clause.IsCatchAll)
-                {
-                    catchType = typeof(Exception);
-                }
-                else if (clause.CatchTypes.Count > 1)
-                {
-                    throw Error.Parse(
-                        clause.CatchTypes[1],
-                        nameof(Strings.MultipleCatchTypesNotSupported),
-                        Strings.MultipleCatchTypesNotSupported);
-                }
-                else
-                {
-                    catchType = TypeResolver.Resolve(clause.CatchTypes[0].TypeName);
-                }
-
-                EntityHandle catchTypeHandle = _context.ILInfo.GetHandleFor(catchType.TypeHandle);
-                var catchStart = _context.BranchBuilder.DefineLabel();
-                var catchEnd = _context.BranchBuilder.DefineLabel();
-                _context.BranchBuilder.MarkLabel(catchStart);
-                foreach (StatementAst statement in clause.Body.Statements)
-                {
-                    statement.Visit(this);
-                }
-
-                _context.BranchBuilder.MarkLabel(catchEnd);
-                _context.BranchBuilder.AddExceptionRegion(
-                    ExceptionRegionKind.Catch,
-                    tryStart,
-                    tryEnd,
-                    catchStart,
-                    catchEnd,
-                    catchType: catchTypeHandle);
-
-                finallyStart = catchEnd;
-            }
-
-            if (tryStatementAst.Finally is not null)
-            {
-                if (finallyStart is null)
-                {
-                    finallyStart = _context.BranchBuilder.DefineLabel();
-                    _context.BranchBuilder.MarkLabel(finallyStart.Value);
-                }
-
-                var finallyEnd = _context.BranchBuilder.DefineLabel();
-                foreach (StatementAst statement in tryStatementAst.Finally.Statements)
-                {
-                    statement.Visit(this);
-                }
-
-                _context.BranchBuilder.MarkLabel(finallyEnd);
-                _context.BranchBuilder.AddExceptionRegion(
-                    ExceptionRegionKind.Finally,
-                    tryStart,
-                    finallyStart.Value,
-                    finallyStart.Value,
-                    finallyEnd);
-            }
+            Throw.ParseException(
+                tryStatementAst.Extent,
+                nameof(Strings.TryStatementNotSupported),
+                Strings.TryStatementNotSupported);
         }
 
         public override void VisitBreakStatement(BreakStatementAst breakStatementAst)
         {
+            _ehReader.MaybeFinalizePendingRegions(breakStatementAst.Extent);
             _context.Encoder.OpCode(ILOpCode.Break);
         }
 
@@ -153,6 +95,11 @@ namespace ILAssembler
                 }
 
                 _preambleFinished = true;
+            }
+
+            if (_ehReader.TryProcessExceptionHandler(in arguments))
+            {
+                return;
             }
 
             string name = arguments.CommandName;
@@ -221,9 +168,9 @@ namespace ILAssembler
             _context.ILInfo.DynamicMethod.InitLocals = false;
             if (arguments.Count == 2)
             {
-                if (arguments[0] is not StringConstantExpressionAst stringConstant
-                    || stringConstant.StringConstantType != StringConstantType.BareWord
-                    || !stringConstant.Value.Equals("init", StringComparison.Ordinal))
+                if (arguments[0] is not (
+                    StringConstantExpressionAst
+                    and { StringConstantType: StringConstantType.BareWord, Value: "init" }))
                 {
                     throw Error.Parse(
                         arguments[0],

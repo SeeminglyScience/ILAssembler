@@ -220,3 +220,145 @@ il { [void]([int] $input) } {
                 ret
 }
 ```
+
+### Exception Handling
+
+All of the exception handling regions are supported (`try`, `catch`, `filter`, `fault`, and `finally`).
+
+#### `.try`
+
+[Protected blocks][protected] (aka `.try` blocks) work as they do in ILAsm. When encoding the exception regions,
+the first enclosed instruction will be the start offset, directly after the last will be the end offset.
+
+Protected blocks must only have *one* type of exception handler attached, though they can be nested.
+
+#### `catch`
+
+[Catch blocks][catch] must have a catch type declared unless preceeded by a `filter` block. For a "catch all", type
+the catch as `object`.
+
+```powershell
+.try {
+    newobj { [void] [InvalidOperationException].new() }
+    throw
+}
+catch { [InvalidOperationException] } {
+    pop
+    leave.s afterTry
+}
+# catch all
+catch { [object] } {
+    rethrow
+}
+
+afterTry: ret
+```
+
+#### `filter`
+
+**NOTE:** Because `filter` is an existing PowerShell keyword with conflicting syntax, it needs to be preceeded by an invocation operator such as <kbd>&</kbd> or <kbd>.</kbd>.
+
+A [filter block][filter] determines whether the following catch block should handle the exception.  When leaving
+the filter, a value is popped from the stack to determine if the catch should be executed.
+
+1. [`exception_continue_search` (`0x0`)][endfilter] indicates the exception did not match
+1. [`exception_execute_handler` (`0x1`)][endfilter] indicates that execution should be transfered to the following `catch` block
+
+Below is an example of a filter in C# with it's rough translation into CIL.
+
+```csharp
+try
+{
+    throw new Exception() { HResult = 0x10 };
+}
+catch (Exception e) when (e.HResult is 0x10)
+{
+    // Do nothing.
+}
+catch
+{
+    throw;
+}
+```
+
+```powershell
+.try {
+    newobj { [void] [Exception].new() }
+    dup
+    ldc.i4.s 0x10
+    callvirt { [void] [Exception].set_HResult([int]) }
+    throw
+}
+. filter {
+    callvirt { [int] [Exception].get_HResult() }
+    ldc.i4.s 0x10
+    ceq
+    endfilter
+}
+catch {
+    pop
+    leave.s exitSEH
+}
+catch { [object] } {
+    rethrow
+}
+
+exitSEH: ret
+```
+
+#### `finally`
+
+The [finally block][finally] will always run when the `try` completes, even if an exception is thrown.
+
+```powershell
+.try {
+    .try {
+        # The finally will run even if you change this to ArgumentNullException.
+        newobj { [void] [InvalidOperationException].new() }
+        throw
+    }
+    catch { [ArgumentNullException] } {
+        pop
+        leave.s exitSEH
+    }
+}
+finally {
+    ldstr 'This always runs'
+    call { [void] [Console]::WriteLine([string]) }
+    endfinally
+}
+
+exitSEH: ret
+```
+
+#### `fault`
+
+The [fault block][fault] acts just like `finally` except it *does not* get executed when the try block completes normally. It is only executed when there was an uncaught exception. In this way it's like a "catch all" style `catch` block but it **does not** handle the exception.
+
+```powershell
+.try {
+    .try {
+        # The finally will run even if you change this to ArgumentNullException.
+        newobj { [void] [InvalidOperationException].new() }
+        throw
+    }
+    catch { [ArgumentNullException] } {
+        pop
+        leave.s exitSEH
+    }
+}
+fault {
+    ldstr 'This only runs if the exception is *not* caught above.'
+    call { [void] [Console]::WriteLine([string]) }
+    endfault
+}
+
+exitSEH: ret
+```
+
+[protected]: https://www.ecma-international.org/publications/files/ECMA-ST/ECMA-335.pdf#page=227&zoom=100,116,722 "EMCA §II.19.1"
+[catch]: https://www.ecma-international.org/publications/files/ECMA-ST/ECMA-335.pdf#page=228&zoom=100,116,210 "EMCA §II.19.3"
+[filter]: https://www.ecma-international.org/publications/files/ECMA-ST/ECMA-335.pdf#page=228&zoom=100,116,509 "EMCA §II.19.4"
+[finally]: https://www.ecma-international.org/publications/files/ECMA-ST/ECMA-335.pdf#page=229&zoom=100,116,120 "EMCA §II.19.5"
+[fault]: https://www.ecma-international.org/publications/files/ECMA-ST/ECMA-335.pdf#page=229&zoom=100,116,429 "EMCA §II.19.6"
+[endfilter]: https://www.ecma-international.org/publications/files/ECMA-ST/ECMA-335.pdf#page=385&zoom=100,116,104 "EMCA §III.3.34"

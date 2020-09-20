@@ -23,7 +23,7 @@ namespace ILAssembler
         public static T ReadNumber<T>(this CommandElementAst element) where T : unmanaged
         {
             Debug.Assert(typeof(T).IsPrimitive);
-            if (!(element is ConstantExpressionAst constant))
+            if (element is not ConstantExpressionAst constant)
             {
                 throw Error.UnexpectedType(element, GetILAsmName(typeof(T)));
             }
@@ -41,13 +41,13 @@ namespace ILAssembler
         public static InstructionArguments GetInstructionArguments(this CommandAst command)
         {
             CommandElementAst nameAst = command.CommandElements[0];
-            if (nameAst is StringConstantExpressionAst stringConstant && !string.IsNullOrEmpty(stringConstant.Value))
+            if (nameAst is StringConstantExpressionAst
+                and { Value: { Length: > 0 }, StringConstantType: StringConstantType.BareWord })
             {
-                string commandName = stringConstant.Value;
                 return new InstructionArguments(
                     command.CommandElements.Slice(1),
                     nameAst.Extent.EndScriptPosition,
-                    commandName);
+                    nameAst.Extent);
             }
 
             Throw.CannotReadCommandName(nameAst.Extent);
