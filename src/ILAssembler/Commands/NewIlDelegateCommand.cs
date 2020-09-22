@@ -64,7 +64,8 @@ namespace ILAssembler.Commands
                         invokeMethod.Name,
                         invokeMethod.ReturnType,
                         invokeMethod.GetParameters().Select(p => p.ParameterType).ToArray(),
-                        restrictedSkipVisibility: true);
+                        typeof(NewIlDelegateCommand).Module,
+                        skipVisibility: true);
                 }
                 else
                 {
@@ -81,7 +82,8 @@ namespace ILAssembler.Commands
                         signature.Name,
                         signature.ReturnType.GetModifiedType(),
                         signature.Parameters.ToModifiedTypeArray(),
-                        restrictedSkipVisibility: true);
+                        typeof(NewIlDelegateCommand).Module,
+                        skipVisibility: true);
                 }
 
                 CilAssembler.CompileTo(
