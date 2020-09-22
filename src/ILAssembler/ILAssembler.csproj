@@ -25,7 +25,7 @@
       For now we'll ignore the compiler warning
     -->
     <Compile Include="$(IntermediateOutputPath)\SR.Designer.cs" />
-    <EmbeddedResource Update="Strings.resx">
+    <EmbeddedResource Update="SR.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <StronglyTypedFileName>$(IntermediateOutputPath)\SR.Designer.cs</StronglyTypedFileName>
       <LastGenOutput>SR.Designer.cs</LastGenOutput>
