@@ -59,6 +59,23 @@ namespace ILAssembler.Commands
                         null));
                 return;
             }
+            catch (InvalidOperationException invalidOperation)
+            {
+                object? data = invalidOperation.Data[typeof(BranchBuilder)];
+                if (data is not null)
+                {
+                    (_, int id) = (ValueTuple<string?, int>)data;
+                    WriteError(
+                        new ErrorRecord(
+                            invalidOperation,
+                            nameof(SR.LabelNotMarked),
+                            ErrorCategory.InvalidOperation,
+                            targetObject: id));
+                    return;
+                }
+
+                throw;
+            }
 
             Debug.Assert(DelegateType is not null, "DelegateType should not be null if method is not null.");
             try

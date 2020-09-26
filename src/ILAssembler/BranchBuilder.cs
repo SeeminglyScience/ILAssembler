@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace ILAssembler
@@ -326,8 +328,7 @@ namespace ILAssembler
 
         private int GetLabelOffsetChecked(LabelHandle label)
         {
-            int offset = 0;
-            if (_marks is null || !_marks.TryGetValue(label, out offset))
+            if (_marks is null || !_marks.TryGetValue(label, out int offset))
             {
                 Debug.Assert(
                     _labels is not null,
@@ -342,13 +343,20 @@ namespace ILAssembler
                     }
                 }
 
-                Throw.InvalidOperationException(
-                    SR.Format(
-                        SR.LabelNotMarked,
-                        (object?)labelName ?? label.Value));
+                ThrowUnmarkedLabelException(labelName, label.Value);
             }
 
             return offset;
+
+            [DoesNotReturn, MethodImpl(MethodImplOptions.NoInlining)]
+            static void ThrowUnmarkedLabelException(string? labelName, int labelIndex)
+            {
+                var exception = new InvalidOperationException(
+                    SR.Format(SR.LabelNotMarked, (object?)labelName ?? labelIndex));
+
+                exception.Data[typeof(BranchBuilder)] = (labelName, labelIndex);
+                throw exception;
+            }
         }
 
         internal readonly struct ExceptionHandlerInfo
