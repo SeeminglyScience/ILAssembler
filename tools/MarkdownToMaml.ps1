@@ -276,7 +276,21 @@ end {
         $null = New-Item -ItemType Directory $directory -ErrorAction Stop
     }
 
+    $filesToProcess = Get-ChildItem $DocsPath\*.md | Where-Object BaseName -NotLike about_*
+
     [MamlBuilder]::ParseAll(
-        (Get-ChildItem $DocsPath\*.md).FullName,
+        $filesToProcess.FullName,
         $file)
+
+    $destinationDirectory = $DestinationFile | Split-Path
+    $aboutBadFormat = (Get-Item $DocsPath\about_BadImageFormat.md).FullName
+    $oldText = [System.IO.File]::ReadAllText($aboutBadFormat)
+    $newText = $oldText -replace '(?m)^#{1,} '
+    [System.IO.File]::WriteAllText(
+        "$destinationDirectory\about_BadImageFormat.help.txt",
+        $newText)
+
+    [System.IO.File]::WriteAllText(
+        "$destinationDirectory\about_InvalidProgram.help.txt",
+        $newText)
 }

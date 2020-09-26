@@ -276,4 +276,13 @@
   <data name="LabelNotMarked" xml:space="preserve">
     <value>The label '{0}' has not been marked.</value>
   </data>
+  <data name="DelegateTypeMissingInvoke" xml:space="preserve">
+    <value>The specified delegate type does not have an usable 'Invoke' method.</value>
+  </data>
+  <data name="InvalidDelegateType" xml:space="preserve">
+    <value>The specified delegate type does not inherit from 'System.Delegate'.</value>
+  </data>
+  <data name="BadImageFormat" xml:space="preserve">
+    <value>The CLR reported an error while attempting to create a delegate for this method. See Get-Help about_BadImageFormat for more information.</value>
+  </data>
 </root>
