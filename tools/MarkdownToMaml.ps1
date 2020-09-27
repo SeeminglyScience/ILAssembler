@@ -130,79 +130,177 @@ begin {
             $synopsis = $this.ReadUntilNextHeader()
 
             $this.MoveToHeader('SYNTAX')
-            $this._blocks.MoveNext()
-            $syntax = $this._blocks.Current.Lines.Slice[0].ToString()
+            $syntaxItems = $(
+                while ($true) {
+                    if (-not $this._blocks.MoveNext()) { throw }
+                    if ($this._blocks.Current -isnot [HeadingBlock]) {
+                        # yield
+                        [XElement]::new($this::cmd + 'syntaxItem',
+                            [XElement]::new($this::maml + 'name',
+                                $this._blocks.Current.Lines.Slice[0]))
+                        break
+                    }
+
+                    $header = $this.GetHeaderName($this._blocks.Current)
+                    if ($header -eq 'DESCRIPTION') {
+                        $null = $this._blocks.MovePrevious()
+                        break
+                    }
+
+                    if (-not $this._blocks.MoveNext()) { throw }
+                    # yield
+                    [XElement]::new($this::cmd + 'syntaxItem',
+                        [XElement]::new($this::maml + 'name',
+                            $this._blocks.Current.Lines.Slice[0] -replace ' \[<CommonParameters>\]'))
+                })
 
             $this.MoveToHeader('DESCRIPTION')
             $description = $this.ReadUntilNextHeader()
 
-            $parameters = @()
-            if ($this._blocks.MoveNext() -and $this.GetHeaderName($this._blocks.Current) -eq 'PARAMETERS') {
-                $parameterName = $this.MoveToNextHeader() -replace '^-*'
-                $type = [string]::Empty
-                $elements = while ($this._blocks.MoveNext()) {
-                    if ($this._blocks.Current -is [FencedCodeBlock]) {
-                        $typeLine = $this._blocks.Current.Lines.Lines[0].Slice.ToString()
-                        $type = $typeLine -replace '^Type: '
-                        break
-                    }
-
-                    $this.Convert($this._blocks.Current)
+            $examples = @()
+            if ($this._blocks.MoveNext()) {
+                if ($this.GetHeaderName($this._blocks.Current) -eq 'EXAMPLES') {
+                    $examples = $this.ReadExamples()
+                } else {
+                    $this._blocks.MovePrevious()
                 }
-
-                $parameters = [XElement]::new($this::cmd + 'parameter',
-                    [XAttribute]::new('required', 'true'),
-                    [XAttribute]::new('variableLength', 'false'),
-                    [XAttribute]::new('globbing', 'false'),
-                    [XAttribute]::new('pipelineInput', 'false'),
-                    [XAttribute]::new('position', '1'),
-                    [XAttribute]::new('aliases', 'none'),
-                    [XElement]::new($this::maml + 'name', $parameterName),
-                    [XElement]::new($this::maml + 'Description', $elements),
-                    [XElement]::new($this::cmd + 'parameterValue',
-                        [XAttribute]::new('required', 'true'),
-                        [XAttribute]::new('variableLength', 'false'),
-                        $type),
-                    [XElement]::new($this::dev + 'type',
-                        [XElement]::new($this::maml + 'name', $type),
-                        [XElement]::new($this::maml + 'uri', @())),
-                    [XElement]::new($this::dev + 'defaultValue', 'None'))
-
-
             }
 
+            $parameters = @()
+            if ($this._blocks.MoveNext()) {
+                if ($this.GetHeaderName($this._blocks.Current) -eq 'PARAMETERS') {
+                    while ($parameterName = $this.MoveToNextHeader() -replace '^-*') {
+                        if ($parameterName -eq 'CommonParameters') {
+                            break
+                        }
+
+                        if ($parameterName -eq 'INPUTS') {
+                            $this._blocks.MovePrevious()
+                            break
+                        }
+
+                        $type = [string]::Empty
+                        $aliases = [string]::Empty
+                        $required = [string]::Empty
+                        $position = [string]::Empty
+                        $default = [string]::Empty
+                        $pipeline = [string]::Empty
+                        $wildcard = [string]::Empty
+                        $elements = while ($this._blocks.MoveNext()) {
+                            if ($this._blocks.Current -is [FencedCodeBlock]) {
+                                $pattern = '[.\s]+?Type: (?<Type>.+)\s+' +
+                                    'Parameter Sets: (?<Sets>.+)\s+' +
+                                    'Aliases: ?(?<Aliases>.*)\s*' +
+                                    'Required: (?<Required>.+)\s+' +
+                                    'Position: (?<Position>.+)\s+' +
+                                    'Default value: (?<Default>.+)\s*' +
+                                    'Accept pipeline input: (?<Pipeline>.+)\s+' +
+                                    'Accept wildcard characters: (?<Wildcard>.+)'
+
+                                if ($this.GetText($this._blocks.Current) -notmatch $pattern) {
+                                    throw
+                                }
+
+                                $type = $matches['Type'].Trim()
+                                $aliases = $matches['Aliases'].Trim()
+                                $required = $matches['Required'].Trim()
+                                $position = $matches['Position'].Trim()
+                                $default = $matches['default'].Trim()
+                                $pipeline = $matches['pipeline'].Trim()
+                                $wildcard = $matches['wildcard'].Trim()
+                                break
+                            }
+
+                            $this.Convert($this._blocks.Current)
+                        }
+
+                        $parameters += [XElement]::new($this::cmd + 'parameter',
+                            [XAttribute]::new('required', $required.ToLower()),
+                            [XAttribute]::new('variableLength', 'false'),
+                            [XAttribute]::new('globbing', $wildcard.ToLower()),
+                            [XAttribute]::new('pipelineInput', $pipeline.ToLower()),
+                            [XAttribute]::new('position', $position.ToLower()),
+                            [XAttribute]::new('aliases', $aliases),
+                            [XElement]::new($this::maml + 'name', $parameterName),
+                            [XElement]::new($this::maml + 'Description', $elements),
+                            [XElement]::new($this::cmd + 'parameterValue',
+                                [XAttribute]::new('required', $required.ToLower()),
+                                [XAttribute]::new('variableLength', 'false'),
+                                $type),
+                            [XElement]::new($this::dev + 'type',
+                                [XElement]::new($this::maml + 'name', $type),
+                                [XElement]::new($this::maml + 'uri', @())),
+                            [XElement]::new($this::dev + 'defaultValue', $default))
+                    }
+                } else {
+                    $this._blocks.MovePrevious()
+                }
+            }
+
+            $this.MoveToHeader('INPUTS')
+            if (-not $this._blocks.MoveNext()) { throw }
+            $inputType = $this.GetHeaderName($this._blocks.Current)
+            $inputDesc = $this.ReadUntilNextHeader()
+
+            $this.MoveToHeader('OUTPUTS')
+            if (-not $this._blocks.MoveNext()) { throw }
+            $outputType = $this.GetHeaderName($this._blocks.Current)
+            $outputDesc = $this.ReadUntilNextHeader()
+
+            $verb, $noun = $this._name -split '-', 2
             return [XElement]::new($this::cmd + 'command',
                     [XElement]::new($this::cmd + 'details',
                         [XElement]::new($this::cmd + 'name', $this._name),
-                        [XElement]::new($this::cmd + 'verb', $this._name),
-                        [XElement]::new($this::cmd + 'noun', ''),
+                        [XElement]::new($this::cmd + 'verb', $verb),
+                        [XElement]::new($this::cmd + 'noun', $noun),
                         [XElement]::new($this::maml + 'description', $synopsis)),
                     [XElement]::new($this::maml + 'description', $description),
-                    [XElement]::new($this::cmd + 'syntax',
-                        [XElement]::new($this::cmd + 'syntaxItem',
-                            [XElement]::new($this::maml + 'name', $syntax))),
+                    [XElement]::new($this::cmd + 'syntax', $syntaxItems),
                     [XElement]::new($this::cmd + 'parameters', $parameters),
                     [XElement]::new($this::cmd + 'inputTypes',
                         [XElement]::new($this::cmd + 'inputType',
                             [XElement]::new($this::dev + 'type',
-                                [XElement]::new($this::maml + 'name', 'None')),
-                            [XElement]::new($this::maml + 'description',
-                                [XElement]::new($this::maml + 'para', 'This function cannot be used with the pipeline.')))),
+                                [XElement]::new($this::maml + 'name', $inputType)),
+                            [XElement]::new($this::maml + 'description', $inputDesc))),
                     [XElement]::new($this::cmd + 'returnValues',
                         [XElement]::new($this::cmd + 'returnValue',
                             [XElement]::new($this::dev + 'type',
-                                [XElement]::new($this::maml + 'name', 'None')),
-                            [XElement]::new($this::maml + 'description',
-                                [XElement]::new($this::maml + 'para', 'This function cannot be used with the pipeline.')))),
+                                [XElement]::new($this::maml + 'name', $outputType)),
+                            [XElement]::new($this::maml + 'description', $outputDesc))),
                     [XElement]::new($this::maml + 'alertSet',
                         [XElement]::new($this::maml + 'alert',
                             [XElement]::new($this::maml + 'para', @()))),
-                    [XElement]::new($this::cmd + 'examples'),
+                    [XElement]::new($this::cmd + 'examples', $examples),
                     [XElement]::new($this::cmd + 'relatedLinks',
                         [XElement]::new($this::maml + 'navigationLink',
                             [XElement]::new($this::maml + 'linkText', 'Online Version:'),
                             [XElement]::new($this::maml + 'uri', $uri))))
 
+        }
+
+        [object] ReadExamples() {
+            return $(
+                while ($this._blocks.MoveNext()) {
+                    $exampleTitle = $this.GetHeaderName($this._blocks.Current)
+                    if ($exampleTitle -eq 'PARAMETERS') {
+                        $null = $this._blocks.MovePrevious()
+                        break
+                    }
+
+                    if (-not $this._blocks.MoveNext() -or $this._blocks.Current -isnot [FencedCodeBlock]) {
+                        throw
+                    }
+
+                    $code = $this.GetText($this._blocks.Current)
+
+                    $description = $this.ReadUntilNextHeader()
+
+                    # yield
+                    [XElement]::new($this::cmd + 'example',
+                        [XElement]::new($this::maml + 'title', $exampleTitle),
+                        [XElement]::new($this::dev + 'code', $code),
+                        [XElement]::new($this::dev + 'remarks', $description))
+                })
         }
 
         [string] GetHeaderName([HeadingBlock] $block) {
