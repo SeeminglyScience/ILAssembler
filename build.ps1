@@ -32,7 +32,8 @@ end {
         }
 
         Install-Module @installModuleSplat -ErrorAction Stop
-        $null = Import-Module @importModuleSplat -ErrorAction Stop
+        $importModuleSplat['ErrorAction'] = 'Stop'
+        $null = Import-Module @importModuleSplat
     }
 
     Invoke-PSDepend -Path $PSScriptRoot/requirements.psd1 -Import -Install -Force:$Force -ErrorAction Stop
