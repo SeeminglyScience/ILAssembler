@@ -5,12 +5,46 @@ param(
     [string] $Configuration = 'Release',
 
     [Parameter()]
-    [switch] $Force
+    [switch] $Force,
+
+    [Parameter()]
+    [switch] $Publish
 )
 end {
-    & "$PSScriptRoot\tools\AssertRequiredModule.ps1" InvokeBuild 5.5.6 -Force:$Force.IsPresent
+    $psDependVersion = '0.3.8'
+    $importModuleSplat = @{
+        MinimumVersion = $psDependVersion
+        Force = $true
+        ErrorAction = 'Ignore'
+        PassThru = $true
+        Name = 'PSDepend'
+    }
+
+    if (-not (Import-Module @importModuleSplat)) {
+        $installModuleSplat = @{
+            MinimumVersion = $psDependVersion
+            Scope = 'CurrentUser'
+            AllowClobber = $true
+            AllowPrerelease = $true
+            SkipPublisherCheck = $true
+            Force = $true
+            Name = 'PSDepend'
+        }
+
+        Install-Module @installModuleSplat -ErrorAction Stop
+        $null = Import-Module @importModuleSplat -ErrorAction Stop
+    }
+
+    Invoke-PSDepend -Path $PSScriptRoot/requirements.psd1 -Import -Install -Force:$Force -ErrorAction Stop
+
+    if ($Publish) {
+        $ibTask = 'Publish'
+    } else {
+        $ibTask = 'Build'
+    }
+
     $invokeBuildSplat = @{
-        Task = 'Build'
+        Task = $ibTask
         File = "$PSScriptRoot/ILAssembler.build.ps1"
         Force = $Force.IsPresent
         Configuration = $Configuration

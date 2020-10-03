@@ -30,7 +30,7 @@ CompanyName = 'Community'
 Copyright = '(c) 2020 Patrick Meinecke. All rights reserved.'
 
 # Description of the functionality provided by this module
-Description = 'Generate an invokable delegate from intermediate language (IL)'
+Description = 'Generate an invokable delegate from intermediate language (IL) instructions.'
 
 # Minimum version of the PowerShell engine required by this module
 PowerShellVersion = '5.1'
@@ -94,13 +94,13 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        # Tags = @()
+        Tags = 'il', 'cil', 'msil'
 
         # A URL to the license for this module.
-        # LicenseUri = ''
+        LicenseUri = 'https://github.com/SeeminglyScience/ILAssembler/blob/master/LICENSE.txt'
 
         # A URL to the main website for this project.
-        # ProjectUri = ''
+        ProjectUri = 'https://github.com/SeeminglyScience/ILAssembler'
 
         # A URL to an icon representing this module.
         # IconUri = ''

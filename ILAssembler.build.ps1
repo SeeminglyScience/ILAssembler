@@ -38,18 +38,20 @@ task Clean {
     New-Item -ItemType Directory $ReleasePath | Out-Null
 }
 
-task AssertDependencies AssertDotNet
-
-task AssertDotNet {
-    $script:dotnet = & $ToolsPath/GetDotNet.ps1 -Unix:$IsUnix
-}
-
 task BuildManaged {
-    & $dotnet publish --framework $DesktopFramework --configuration $Configuration --verbosity q -nologo
-    & $dotnet publish --framework $CoreFramework --configuration $Configuration --verbosity q -nologo
+    if (-not $IsUnix) {
+        dotnet publish --framework $DesktopFramework --configuration $Configuration --verbosity q -nologo
+    }
+
+    dotnet publish --framework $CoreFramework --configuration $Configuration --verbosity q -nologo
 }
 
 task BuildMaml {
+    if ($PSVersionTable.PSVersion.Major -lt 7) {
+        Write-Warning 'Building MAML help is only supported in PSv7+.'
+        return
+    }
+
     & $ToolsPath/MarkdownToMaml.ps1 -DocsPath $PSScriptRoot/docs/en-US -DestinationFile $ReleasePath/en-US/ILAssembler-help.xml
 }
 
@@ -58,12 +60,14 @@ task CopyToRelease {
         Join-Path $PowerShellPath -ChildPath $PSItem | Copy-Item -Destination $ReleasePath -Recurse @FailOnError
     }
 
-    if (-not (Test-Path $ReleasePath/Desktop)) {
-        $null = New-Item -ItemType Directory $ReleasePath/Desktop @FailOnError
-    }
+    if (-not $IsUnix) {
+        if (-not (Test-Path $ReleasePath/Desktop)) {
+            $null = New-Item -ItemType Directory $ReleasePath/Desktop @FailOnError
+        }
 
-    Get-ChildItem "$CSharpPath/$ModuleName/bin/$Configuration/$DesktopFramework/publish" | ForEach-Object {
-        Copy-Item $PSItem.FullName -Destination $ReleasePath/Desktop @FailOnError
+        Get-ChildItem "$CSharpPath/$ModuleName/bin/$Configuration/$DesktopFramework/publish" | ForEach-Object {
+            Copy-Item $PSItem.FullName -Destination $ReleasePath/Desktop @FailOnError
+        }
     }
 
     if (-not (Test-Path $ReleasePath/Core)) {
@@ -90,15 +94,23 @@ task DoInstall {
 }
 
 task DoPublish {
-    if (-not (Test-Path $env:USERPROFILE/.PSGallery/apikey.xml)) {
+    if ($env:GALLERY_API_KEY) {
+        $apiKey = $env:GALLERY_API_KEY
+    } else {
+        $userProfile = [Environment]::GetFolderPath([Environment+SpecialFolder]::UserProfile)
+        if (Test-Path $userProfile/.PSGallery/apikey.xml) {
+            $apiKey = (Import-Clixml $userProfile/.PSGallery/apikey.xml).GetNetworkCredential().Password
+        }
+    }
+
+    if (-not $apiKey) {
         throw 'Could not find PSGallery API key!'
     }
 
-    $apiKey = (Import-Clixml $env:USERPROFILE/.PSGallery/apikey.xml).GetNetworkCredential().Password
-    Publish-Module -Name $ReleasePath -NuGetApiKey $apiKey -Confirm
+    Publish-Module -Name $ReleasePath -NuGetApiKey $apiKey -AllowPrerelease -Force:$Force.IsPresent
 }
 
-task Build -Jobs Clean, AssertDependencies, BuildManaged, CopyToRelease, BuildMaml
+task Build -Jobs Clean, BuildManaged, CopyToRelease, BuildMaml
 
 task Install -Jobs Build, DoInstall
 
