@@ -9,9 +9,27 @@ param(
 )
 begin {
     function TestDotNetVersion([System.Management.Automation.CommandInfo] $command) {
-        $existingVersion = ((& $command --version) -split '-')[0]
-        if ($existingVersion -and (([version]$existingVersion) -ge ([version]$Version))) {
+        $existingVersion, $existingPrereleaseTag = ((& $command --version) -split '-', 2)
+        if (-not $existingVersion) {
+            return $false
+        }
+
+        $targetVersion, $targetPrereleaseTag = $Version -split '-', 2
+        if (([version]$existingVersion) -gt ([version]$targetVersion)) {
             return $true
+        }
+
+        if (([version]$existingVersion) -eq ([version]$targetVersion)) {
+            if ($targetPrereleaseTag -eq $existingVersionPrereleaseTag) {
+                return $true
+            }
+
+            # If the tags aren't equal, don't try to compare prereleases. Instead
+            # if the target has a prerelease tag, and the installed version does not,
+            # assume it's newer.
+            if ($targetPrereleaseTag -and -not $existingVersionPrereleaseTag) {
+                return $true
+            }
         }
 
         return $false
