@@ -285,4 +285,7 @@
   <data name="BadImageFormat" xml:space="preserve">
     <value>The CLR reported an error while attempting to create a delegate for this method. See Get-Help about_BadImageFormat for more information.</value>
   </data>
+  <data name="FullLanguageRequired" xml:space="preserve">
+    <value>This command cannot be invoked in constrained or no language mode.</value>
+  </data>
 </root>
