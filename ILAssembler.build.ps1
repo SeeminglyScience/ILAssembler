@@ -45,10 +45,10 @@ task AssertDotNet -If { -not $global:dotnet } {
 
 task BuildManaged -Jobs AssertDotNet, {
     if (-not $IsUnix) {
-        dotnet publish --framework $DesktopFramework --configuration $Configuration --verbosity q -nologo
+        & $dotnet publish --framework $DesktopFramework --configuration $Configuration --verbosity q -nologo
     }
 
-    dotnet publish --framework $CoreFramework --configuration $Configuration --verbosity q -nologo
+    & $dotnet publish --framework $CoreFramework --configuration $Configuration --verbosity q -nologo
 }
 
 task BuildMaml {
