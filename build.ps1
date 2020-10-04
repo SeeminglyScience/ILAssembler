@@ -11,72 +11,38 @@ param(
     [switch] $Publish
 )
 end {
-    $psDependVersion = '0.3.8'
-    $importModuleSplat = @{
-        MinimumVersion = $psDependVersion
-        Force = $true
-        ErrorAction = 'Ignore'
-        PassThru = $true
-        Name = 'PSDepend'
-    }
+    $IsUnix = $PSEdition -eq 'Core' -and -not $IsWindows
+    $requirements = Import-PowerShellDataFile $PSScriptRoot\requirements.psd1
+    foreach ($requirement in $requirements.GetEnumerator()) {
+        if ($requirement.Key -match 'Dotnet') {
+            $global:dotnet = & "$PSScriptRoot/tools/GetDotNet.ps1" -Version $requirement.Value -Unix:$IsUnix
+            continue
+        }
 
-    if (-not (Import-Module @importModuleSplat)) {
-        $installModuleSplat = @{
-            MinimumVersion = $psDependVersion
-            Scope = 'CurrentUser'
-            AllowClobber = $true
-            AllowPrerelease = $true
-            SkipPublisherCheck = $true
+        $importModuleSplat = @{
+            MinimumVersion = $requirement.Value
             Force = $true
-            Name = 'PSDepend'
+            ErrorAction = 'Ignore'
+            PassThru = $true
+            Name = $requirement.Key
         }
 
-        Install-Module @installModuleSplat -ErrorAction Stop
-        $importModuleSplat['ErrorAction'] = 'Stop'
-        $null = Import-Module @importModuleSplat
-    }
-
-    # Seems like PSDepend is failing to install from the gallery in the github
-    # actions ubuntu image. As a band-aid I'm just gonna repeat the logic here
-    # until I figure out a proper fix.
-    if ($IsLinux) {
-        $reqs = Import-PowerShellDataFile $PSScriptRoot/requirements.psd1
-        foreach ($req in $reqs.GetEnumerator()) {
-            if ($req.Key -match 'Dotnet') {
-                continue
-            }
-
-            $importModuleSplat = @{
-                MinimumVersion = $req.Value
+        if (-not (Import-Module @importModuleSplat)) {
+            $installModuleSplat = @{
+                MinimumVersion = $requirement.Value
+                Scope = 'CurrentUser'
+                AllowClobber = $true
+                AllowPrerelease = $true
+                SkipPublisherCheck = $true
                 Force = $true
-                ErrorAction = 'Ignore'
-                PassThru = $true
-                Name = $req.Key
+                Name = $requirement.Key
             }
 
-            if (-not (Import-Module @importModuleSplat)) {
-                $installModuleSplat = @{
-                    MinimumVersion = $req.Value
-                    Scope = 'CurrentUser'
-                    AllowClobber = $true
-                    AllowPrerelease = $true
-                    SkipPublisherCheck = $true
-                    Force = $true
-                    Name = $req.Key
-                }
-
-                Install-Module @installModuleSplat -ErrorAction Stop
-                $importModuleSplat['ErrorAction'] = 'Stop'
-                $null = Import-Module @importModuleSplat
-            }
-
-            # This also doesn't seem to work right.
-            $env:PATH += ([System.IO.Path]::PathSeparator) + '/home/runner/.dotnet'
-            sudo apt-get install -y zlib1g
+            Install-Module @installModuleSplat -ErrorAction Stop
+            $importModuleSplat['ErrorAction'] = 'Stop'
+            $null = Import-Module @importModuleSplat
         }
     }
-
-    Invoke-PSDepend -Path $PSScriptRoot/requirements.psd1 -Import -Install -Force:$Force -ErrorAction Stop
 
     if ($Publish) {
         $ibTask = 'Publish'

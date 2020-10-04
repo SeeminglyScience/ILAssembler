@@ -38,7 +38,12 @@ task Clean {
     New-Item -ItemType Directory $ReleasePath | Out-Null
 }
 
-task BuildManaged {
+task AssertDotNet -If { -not $global:dotnet } {
+    $requirements = Import-PowerShellDataFile "$PSScriptRoot/requirements"
+    $global:dotnet = & "$PSScriptRoot/tools/GetDotNet.ps1" -Version $requirements['DotnetSdk::release'] -Unix:$IsUnix
+}
+
+task BuildManaged -Jobs AssertDotNet, {
     if (-not $IsUnix) {
         dotnet publish --framework $DesktopFramework --configuration $Configuration --verbosity q -nologo
     }
