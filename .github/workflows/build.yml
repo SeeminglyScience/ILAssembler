@@ -19,8 +19,9 @@ jobs:
           shell: pwsh
     steps:
     - uses: actions/checkout@v1
-    - name: Test and Build
+    - name: Enable null conditional operators
     - run: Enable-ExperimentalFeature PSNullConditionalOperators -ErrorAction Ignore -WarningAction Ignore
+    - name: Test and Build
     - run: ./build.ps1 -Force
     - uses: actions/upload-artifact@v1
       with:
