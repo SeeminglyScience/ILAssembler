@@ -36,18 +36,38 @@ namespace ILAssembler.Commands
 
         protected override void BeginProcessing()
         {
-            DynamicMethod? method;
+            if (SessionState.LanguageMode is not PSLanguageMode.FullLanguage)
+            {
+                WriteError(
+                    new ErrorRecord(
+                        new PSInvalidOperationException(SR.FullLanguageRequired),
+                        nameof(SR.FullLanguageRequired),
+                        ErrorCategory.InvalidOperation,
+                        targetObject: null));
+                return;
+            }
+
+            Debug.Assert(Body is not null, "Engine should ensure body is not null.");
             try
             {
-                method = CreateDynamicMethod();
-                if (method is null)
+                if (Signature is not null)
                 {
+                    WriteObject(
+                        CilAssemblage.CreateDelegate(
+                            (ScriptBlockAst)Signature.Ast,
+                            (ScriptBlockAst)Body.Ast),
+                        enumerateCollection: false);
                     return;
                 }
 
-                CilAssembler.CompileTo(
-                    (ScriptBlockAst)Body!.Ast,
-                    method);
+                Debug.Assert(
+                    DelegateType is not null,
+                    "Engine should ensure either Signature or DelegateType are not null.");
+
+                WriteObject(
+                    CilAssemblage.CreateDelegate(
+                        DelegateType,
+                        (ScriptBlockAst)Body.Ast));
             }
             catch (ILParseException ilParseException)
             {
@@ -57,7 +77,6 @@ namespace ILAssembler.Commands
                         ilParseException.Errors?.FirstOrDefault()?.ErrorId ?? "ILParseException",
                         ErrorCategory.InvalidArgument,
                         null));
-                return;
             }
             catch (InvalidOperationException invalidOperation)
             {
@@ -76,11 +95,15 @@ namespace ILAssembler.Commands
 
                 throw;
             }
-
-            Debug.Assert(DelegateType is not null, "DelegateType should not be null if method is not null.");
-            try
+            catch (ArgumentException argumentException)
             {
-                WriteObject(method.CreateDelegate(DelegateType));
+                if (argumentException.TryCreateErrorRecord(out ErrorRecord record))
+                {
+                    WriteError(record);
+                    return;
+                }
+
+                throw;
             }
             catch (BadImageFormatException badImageException)
             {
@@ -89,67 +112,8 @@ namespace ILAssembler.Commands
                         new PSArgumentException(SR.BadImageFormat, badImageException),
                         nameof(SR.BadImageFormat),
                         ErrorCategory.InvalidData,
-                        method));
+                        targetObject: null));
             }
-        }
-
-        private DynamicMethod? CreateDynamicMethod()
-        {
-            if (DelegateType is not null)
-            {
-                if (!DelegateType.IsSubclassOf(typeof(Delegate)))
-                {
-                    WriteError(
-                        new ErrorRecord(
-                            new PSArgumentException(SR.InvalidDelegateType, nameof(DelegateType)),
-                            nameof(SR.InvalidDelegateType),
-                            ErrorCategory.InvalidArgument,
-                            DelegateType));
-                    return null;
-                }
-
-                MethodInfo? invokeMethod = DelegateType.GetMethod(nameof(Action.Invoke));
-                if (invokeMethod is null)
-                {
-                    WriteError(
-                        new ErrorRecord(
-                            new PSArgumentException(SR.DelegateTypeMissingInvoke, nameof(DelegateType)),
-                            nameof(SR.DelegateTypeMissingInvoke),
-                            ErrorCategory.InvalidArgument,
-                            DelegateType));
-                    return null;
-                }
-
-                ParameterInfo[] parameters = invokeMethod.GetParameters();
-                var parameterTypes = new Type[parameters.Length];
-                for (int i = parameterTypes.Length - 1; i >= 0; i--)
-                {
-                    parameterTypes[i] = parameters[i].ParameterType;
-                }
-
-                return new DynamicMethod(
-                    invokeMethod.Name,
-                    invokeMethod.ReturnType,
-                    parameterTypes,
-                    typeof(NewIlDelegateCommand).Module,
-                    skipVisibility: true);
-            }
-
-            var signatureParser = new MethodSignatureParser(
-                rejectCtor: true,
-                requireResolvableDeclaringType: false);
-
-            Signature!.Ast.Visit(signatureParser);
-            var signature = (MethodIdentifier)signatureParser.GetMemberIdentifier(Signature!.Ast.Extent);
-
-            DelegateType = DelegateTypeFactory.GetDelegateType(signature);
-
-            return new DynamicMethod(
-                signature.Name,
-                signature.ReturnType.GetModifiedType(),
-                signature.Parameters.ToModifiedTypeArray(),
-                typeof(NewIlDelegateCommand).Module,
-                skipVisibility: true);
         }
     }
 }
