@@ -36,3 +36,4 @@ jobs:
       with:
         name: ILAssembler
         path: ./Release/ILAssembler
+        if: matrix.os == 'windows-latest'
