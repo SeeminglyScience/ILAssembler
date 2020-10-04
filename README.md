@@ -182,8 +182,7 @@ ldfld { [int] [ValueTuple[int]].Item1 }
 ```powershell
 .maxstack 8
 ```
-
-Equivilent of `.maxstack` in ILAsm. Declares the maximum amount of items that will be on the
+Equivalent of `.maxstack` in ILAsm. Declares the maximum amount of items that will be on the
 evaluation stack. Defaults to `8` if not specified.
 
 **NOTE:** Must be before any opcodes.
@@ -195,7 +194,7 @@ evaluation stack. Defaults to `8` if not specified.
 .locals init { }
 ```
 
-Declares local variables, equivilent of `.locals` in ILAsm. Specifying `init` will initialize locals
+Declares local variables, equivalent of `.locals` in ILAsm. Specifying `init` will initialize locals
 to zero on the stack at the start of the method (this is the default behavior in C#).
 
 **NOTE:** Must be before any opcodes.
