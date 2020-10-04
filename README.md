@@ -5,11 +5,10 @@
         Use Common Intermediate Language (CIL/MSIL) in PowerShell to build invokable delegates using a domain specific
         language similar to ILAsm.
     </sub>
-    <br /><br />
+    <br />
     <a href="https://github.com/SeeminglyScience/ILAssembler/commits/master">
         <img src="https://github.com/SeeminglyScience/ILAssembler/workflows/build/badge.svg" alt="BuildStatus" />
     </a>
-    &nbsp;|&nbsp;
     <a href="https://www.powershellgallery.com/packages/ILAssembler">
         <img alt="PowerShell Gallery Version" src="https://img.shields.io/powershellgallery/v/ILAssembler" />
     </a>
