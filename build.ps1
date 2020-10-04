@@ -69,6 +69,9 @@ end {
                 $importModuleSplat['ErrorAction'] = 'Stop'
                 $null = Import-Module @importModuleSplat
             }
+
+            # This also doesn't seem to work right.
+            $env:PATH += ([System.IO.Path]::PathSeparator) + '/home/runner/.dotnet'
         }
     }
 
