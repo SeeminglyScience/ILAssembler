@@ -2,16 +2,34 @@
 param(
     [Parameter()]
     [ValidateNotNullOrEmpty()]
-    [string] $Version = '5.0.100',
+    [string] $Version = '5.0.100-rc.2.20462.2',
 
     [Parameter()]
     [switch] $Unix
 )
 begin {
     function TestDotNetVersion([System.Management.Automation.CommandInfo] $command) {
-        $existingVersion = ((& $command --version) -split '-')[0]
-        if ($existingVersion -and (([version]$existingVersion) -ge ([version]$Version))) {
+        $existingVersion, $existingPrereleaseTag = ((& $command --version) -split '-', 2)
+        if (-not $existingVersion) {
+            return $false
+        }
+
+        $targetVersion, $targetPrereleaseTag = $Version -split '-', 2
+        if (([version]$existingVersion) -gt ([version]$targetVersion)) {
             return $true
+        }
+
+        if (([version]$existingVersion) -eq ([version]$targetVersion)) {
+            if ($targetPrereleaseTag -eq $existingVersionPrereleaseTag) {
+                return $true
+            }
+
+            # If the tags aren't equal, don't try to compare prereleases. Instead
+            # if the target has a prerelease tag, and the installed version does not,
+            # assume it's newer.
+            if ($targetPrereleaseTag -and -not $existingVersionPrereleaseTag) {
+                return $true
+            }
         }
 
         return $false
@@ -62,7 +80,7 @@ end {
     try {
         $installerPath = $null
         if ($Unix.IsPresent) {
-            $uri = "https://raw.githubusercontent.com/dotnet/cli/v2.0.0/scripts/obtain/dotnet-install.sh"
+            $uri = "https://dot.net/v1/dotnet-install.sh"
             $installerPath = [System.IO.Path]::GetTempPath() + 'dotnet-install.sh'
             $scriptText = [System.Net.WebClient]::new().DownloadString($uri)
             Set-Content $installerPath -Value $scriptText -Encoding UTF8
@@ -73,7 +91,7 @@ end {
                 }
             }
         } else {
-            $uri = "https://raw.githubusercontent.com/dotnet/cli/v2.0.0/scripts/obtain/dotnet-install.ps1"
+            $uri = "https://dot.net/v1/dotnet-install.ps1"
             $scriptText = [System.Net.WebClient]::new().DownloadString($uri)
 
             # Stop the official script from hard exiting at times...
