@@ -52,6 +52,7 @@ task BuildMaml {
         return
     }
 
+    Enable-ExperimentalFeature PSNullConditionalOperators -ErrorAction Ignore -WarningAction Ignore
     & $ToolsPath/MarkdownToMaml.ps1 -DocsPath $PSScriptRoot/docs/en-US -DestinationFile $ReleasePath/en-US/ILAssembler-help.xml
 }
 
