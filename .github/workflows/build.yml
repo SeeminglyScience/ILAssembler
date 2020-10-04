@@ -37,3 +37,8 @@ jobs:
         name: ILAssembler
         path: ./Release/ILAssembler
         if: matrix.os == 'windows-latest'
+    - uses: actions/upload-artifact@v1
+      with:
+        name: ILAssembler-${{ matrix.os }}
+        path: ./Release/ILAssembler
+        if: matrix.os != 'windows-latest'
