@@ -33,12 +33,12 @@ jobs:
     - name: Test and Build
       run: ./build.ps1 -Force
     - uses: actions/upload-artifact@v1
+      if: matrix.os == 'windows-latest'
       with:
         name: ILAssembler
         path: ./Release/ILAssembler
-        if: matrix.os == 'windows-latest'
     - uses: actions/upload-artifact@v1
+      if: matrix.os != 'windows-latest'
       with:
         name: ILAssembler-${{ matrix.os }}
         path: ./Release/ILAssembler
-        if: matrix.os != 'windows-latest'
