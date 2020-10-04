@@ -72,6 +72,7 @@ end {
 
             # This also doesn't seem to work right.
             $env:PATH += ([System.IO.Path]::PathSeparator) + '/home/runner/.dotnet'
+            sudo apt-get install -y zlib1g
         }
     }
 
