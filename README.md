@@ -6,14 +6,16 @@
         language similar to ILAsm.
     </sub>
     <br /><br />
-    <a href="https://github.com/SeeminglyScience/ILAssembler/commits/master">
+    <a title="Commits" href="https://github.com/SeeminglyScience/ILAssembler/commits/master">
         <img alt="Build Status" src="https://github.com/SeeminglyScience/ILAssembler/workflows/build/badge.svg" />
     </a>
-    <a href="https://www.powershellgallery.com/packages/ILAssembler">
-        <img alt="PowerShell Gallery Version" src="https://img.shields.io/powershellgallery/v/ILAssembler" />
+    <a title="ILAssembler on PowerShell Gallery" href="https://www.powershellgallery.com/packages/ILAssembler">
+        <img alt="PowerShell Gallery Version (including pre-releases)" src="https://img.shields.io/powershellgallery/v/ILAssembler?include_prereleases&label=gallery">
+    </a>
+    <a title="LICENSE.txt" href="https://github.com/SeeminglyScience/ILAssembler/blob/master/LICENSE.txt">
+         <img alt="GitHub" src="https://img.shields.io/github/license/SeeminglyScience/ILAssembler">
     </a>
 </p>
-
 
 ## Features
 
@@ -30,6 +32,52 @@
 # AllowClobber probably not necessary.
 Install-Module ILAssembler -Scope CurrentUser -Force -AllowClobber
 ```
+
+### Use
+
+```powershell
+$delegate = il { [int]([uint32], [uint32]) } {
+    ldarg.0
+    ldarg.1
+    add
+    ret
+}
+
+$delegate.Invoke
+# OverloadDefinitions
+# -------------------
+# int Invoke(uint32 arg1, uint32 arg2)
+
+$delegate.Invoke(10, 10)
+# 20
+```
+
+## Help
+
+- [Help Documentation](https://github.com/SeeminglyScience/ILAssembler/tree/master/docs/en-US)
+  - [All OpCodes](https://github.com/SeeminglyScience/ILAssembler/tree/master/docs/en-US)
+  - [`New-ILDelegate` (alias `il`)](https://github.com/SeeminglyScience/ILAssembler/blob/master/docs/en-US/New-IlDelegate.md)
+  - [about_BadImageFormat](https://github.com/SeeminglyScience/ILAssembler/blob/master/docs/en-US/about_BadImageFormat.md)
+- [Syntax](#syntax)
+  - [`il` blocks](#il-blocks)
+  - [Signatures](#signatures)
+    - [Anonymous Method Signature](#anonymous-method-signature)
+    - [Resolvable Method Signature](#resolvable-method-signature)
+    - [Resolvable Type Signature](#resolvable-type-signature)
+    - [Resolvable Field Signature](#resolvable-field-signature)
+  - [Meta Instructions](#meta-instructions)
+    - [`.maxstack`](#maxstack)
+    - [`.locals`](#locals)
+  - [Branch Labels](#branch-labels)
+    - [Switch Instruction](#switch-instruction)
+  - [Exception Handling](#exception-handling)
+    - [`.try`](#try)
+    - [`catch`](#catch)
+    - [`filter`](#filter)
+    - [`finally`](#finally)
+    - [`fault`](#fault)
+
+## Syntax
 
 ### `il` blocks
 
