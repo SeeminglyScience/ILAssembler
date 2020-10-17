@@ -39,7 +39,7 @@ task Clean {
 }
 
 task AssertDotNet -If { -not $global:dotnet } {
-    $requirements = Import-PowerShellDataFile "$PSScriptRoot/requirements"
+    $requirements = Import-PowerShellDataFile "$PSScriptRoot/requirements.psd1"
     $global:dotnet = & "$PSScriptRoot/tools/GetDotNet.ps1" -Version $requirements['DotnetSdk::release'] -Unix:$IsUnix
 }
 

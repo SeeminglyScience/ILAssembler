@@ -55,8 +55,8 @@ namespace ILAssembler
 
         public static Delegate CreateDelegate(Type delegateType, ScriptBlockAst body, bool skipCache)
         {
-            return CreateCilMethod(delegateType, body, skipCache)
-                .CreateDelegate(delegateType);
+            DynamicMethod method = CreateCilMethod(delegateType, body, skipCache);
+            return method.CreateDelegate(delegateType);
         }
 
         private static DynamicMethod CreateCilMethod(Type delegateType, ScriptBlockAst body, bool skipCache = false)

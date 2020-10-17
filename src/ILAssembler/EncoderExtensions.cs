@@ -10,7 +10,9 @@ namespace ILAssembler
     {
         public static EntityHandle GetHandleFor(this DynamicILInfo ilInfo, RuntimeTypeHandle typeHandle)
         {
-            return MetadataTokens.EntityHandle(ilInfo.GetTokenFor(typeHandle));
+            int token = ilInfo.GetTokenFor(typeHandle);
+            EntityHandle handle = MetadataTokens.EntityHandle(token);
+            return handle;
         }
 
         public static void Type(this SignatureTypeEncoder encoder, Type type, DynamicILInfo ilInfo)
@@ -30,19 +32,50 @@ namespace ILAssembler
                 return;
             }
 
+            if (type.IsGenericParameter)
+            {
+                if (type.DeclaringMethod is not null)
+                {
+                    encoder.GenericMethodTypeParameter(type.GenericParameterPosition);
+                    return;
+                }
+
+                encoder.GenericTypeParameter(type.GenericParameterPosition);
+            }
+
             if (type.IsGenericType)
             {
-                Type genericDefinition = type.GetGenericTypeDefinition();
-                Type[] genericArguments = type.GetGenericArguments();
-                GenericTypeArgumentsEncoder argumentsEncoder = encoder.GenericInstantiation(
-                    ilInfo.GetHandleFor(genericDefinition.TypeHandle),
-                    genericArguments.Length,
-                    genericDefinition.IsValueType);
-
-                foreach (Type genericArgument in genericArguments)
+                // The supported way of declaring a generic instantiation isn't
+                // working correctly in a locals sig. Unsure if it's something
+                // we're doing wrong or if it's a problem with the DynamicILInfo
+                // API. As a workaround, we're depending on an implementation
+                // detail used by the runtime to embed a type handle directly
+                // as a pointer.
+                //
+                // The proper implementation is commented below this.
+                //
+                // https://github.com/SeeminglyScience/ILAssembler/issues/42
+                const byte ELEMENT_TYPE_INTERNAL = 0x21;
+                encoder.Builder.WriteByte(ELEMENT_TYPE_INTERNAL);
+                IntPtr rawHandle = type.TypeHandle.Value;
+                unsafe
                 {
-                    Type(argumentsEncoder.AddArgument(), genericArgument, ilInfo);
+                    encoder.Builder.WriteBytes(
+                        (byte*)&rawHandle,
+                        sizeof(IntPtr));
                 }
+
+                // Type genericDefinition = type.GetGenericTypeDefinition();
+                // Type[] genericArguments = type.GetGenericArguments();
+                // GenericTypeArgumentsEncoder argumentsEncoder = encoder.GenericInstantiation(
+                //     ilInfo.GetHandleFor(genericDefinition.TypeHandle),
+                //     genericArguments.Length,
+                //     genericDefinition.IsValueType);
+
+                // foreach (Type genericArgument in genericArguments)
+                // {
+                //     Type(argumentsEncoder.AddArgument(), genericArgument, ilInfo);
+                // }
 
                 return;
             }
