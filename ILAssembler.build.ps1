@@ -99,6 +99,7 @@ task DoTest {
 
     $arguments = @(
         '-NoProfile'
+        '-NonInteractive'
         if (-not $IsUnix) {
             '-ExecutionPolicy', 'Bypass'
         })
@@ -106,6 +107,7 @@ task DoTest {
     # I know this parameter set is deprecated, but it was taking too much
     # fiddling to use the new stuff.
     $command = {
+        Import-Module Pester -RequiredVersion 5.0.4
         $results = Invoke-Pester -OutputFormat NUnitXml -OutputFile '{0}' -WarningAction Ignore -PassThru
         if ($results.Failed) {{
             [Environment]::Exit(1)
@@ -115,7 +117,7 @@ task DoTest {
     $encodedCommand = [convert]::ToBase64String(
         [Text.Encoding]::Unicode.GetBytes($command))
 
-    & $pwsh @arguments -EncodedCommand $encodedCommand
+    & $pwsh @arguments -OutputFormat Text -EncodedCommand $encodedCommand
 
     if ($LASTEXITCODE -ne 0) {
         throw 'Pester test failed!'
