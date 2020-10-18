@@ -8,7 +8,7 @@ Describe 'OpCode signatures' {
             il { [void]@() } {
                 call { [void] [Console]::WriteLine() }
                 ret
-            } | Should -HaveBody (0x28, 0x02, 0x00, 0x00, 0x06, 0x2b)
+            } | Should -HaveBody (0x28, 0x02, 0x00, 0x00, 0x06, 0x2A)
         }
 
         It 'callvirt instance' {
