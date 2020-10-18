@@ -11,7 +11,7 @@ param(
 
 $ModuleName = 'ILAssembler'
 $DesktopFramework = 'net471'
-$CoreFramework = 'net5'
+$CoreFramework = 'netcoreapp3.1'
 
 $FailOnError = @{
     ErrorAction = [System.Management.Automation.ActionPreference]::Stop
