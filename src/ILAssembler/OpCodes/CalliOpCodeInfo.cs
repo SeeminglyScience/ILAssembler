@@ -110,7 +110,7 @@ namespace ILAssembler.OpCodes
                         || callingConvention.Value == SignatureCallingConvention.VarArgs;
                     var parser = new MethodSignatureParser(
                         rejectCtor: true,
-                        requireResolvableDeclaringType: isManaged);
+                        requireResolvableDeclaringType: false);
 
                     scriptBlockExpression.ScriptBlock.Visit(parser);
                     signature = (MethodIdentifier)parser.GetMemberIdentifier(scriptBlockExpression.Extent);

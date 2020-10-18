@@ -84,6 +84,44 @@ task CopyToRelease {
     }
 }
 
+task DoTest {
+    $testResultsFolder = "$PSScriptRoot/TestResults"
+    $testResultsFile = "$testResultsFolder/Pester.xml"
+    if (-not (Test-Path $testResultsFolder)) {
+        $null = New-Item $testResultsFolder -ItemType Directory -ErrorAction Stop
+    }
+
+    if (Test-Path $testResultsFile) {
+        Remove-Item $testResultsFile -ErrorAction Stop
+    }
+
+    $pwsh = [Environment]::GetCommandLineArgs()[0] -replace '\.dll$', ''
+
+    $arguments = @(
+        '-NoProfile'
+        if (-not $IsUnix) {
+            '-ExecutionPolicy', 'Bypass'
+        })
+
+    # I know this parameter set is deprecated, but it was taking too much
+    # fiddling to use the new stuff.
+    $command = {
+        $results = Invoke-Pester -OutputFormat NUnitXml -OutputFile '{0}' -WarningAction Ignore -PassThru
+        if ($results.Failed) {{
+            [Environment]::Exit(1)
+        }}
+    } -f $testResultsFile
+
+    $encodedCommand = [convert]::ToBase64String(
+        [Text.Encoding]::Unicode.GetBytes($command))
+
+    & $pwsh @arguments -EncodedCommand $encodedCommand
+
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Pester test failed!'
+    }
+}
+
 task DoInstall {
     $installBase = $Home
     if ($profile) {
@@ -117,8 +155,10 @@ task DoPublish {
 
 task Build -Jobs Clean, BuildManaged, CopyToRelease, BuildMaml
 
-task Install -Jobs Build, DoInstall
+task Test -Jobs Build, DoTest
 
-task Publish -Jobs Build, DoPublish
+task Install -Jobs Build, DoTest, DoInstall
+
+task Publish -Jobs Build, DoTest, DoPublish
 
 task . Build
