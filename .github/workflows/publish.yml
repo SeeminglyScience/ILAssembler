@@ -26,3 +26,9 @@ jobs:
       run: ./build.ps1 -Force -Publish
       env:
         GALLERY_API_KEY: ${{ secrets.GALLERY_API_KEY }}
+    - name: Upload Test Results
+      if: always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: Unit Test Results
+        path: ./TestResults/Pester.xml

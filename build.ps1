@@ -47,7 +47,7 @@ end {
     if ($Publish) {
         $ibTask = 'Publish'
     } else {
-        $ibTask = 'Build'
+        $ibTask = 'Test'
     }
 
     $invokeBuildSplat = @{

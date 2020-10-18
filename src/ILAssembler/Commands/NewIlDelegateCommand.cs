@@ -10,6 +10,7 @@ namespace ILAssembler.Commands
 {
     [Cmdlet(VerbsCommon.New, "IlDelegate", DefaultParameterSetName = ByAstSignatureSet)]
     [Alias("il")]
+    [OutputType(typeof(MulticastDelegate), typeof(Action))]
     [EditorBrowsable(EditorBrowsableState.Never)]
     public sealed class NewIlDelegateCommand : PSCmdlet
     {
