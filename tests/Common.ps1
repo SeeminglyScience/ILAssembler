@@ -1,11 +1,7 @@
-$projectBase = $PSCommandPath | Split-Path | Split-Path
-$psd1File = Get-ChildItem $projectBase/Release/ILAssembler |
-    Get-ChildItem |
-    Get-ChildItem |
-    Where-Object Name -Like *.psd1 |
-    Select-Object -ExpandProperty FullName
-
 if (-not (Get-Module ILAssembler -ea Ignore)) {
+    $projectBase = $PSScriptRoot | Split-Path
+    $psd1File = (Get-ChildItem $projectBase/Release/ILAssembler/*/ILAssembler.psd1).FullName
+
     Import-Module $psd1File -Global
 }
 
